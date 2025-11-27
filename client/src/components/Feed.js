@@ -2,24 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from 'react-router-dom';
 import {
-  Box,
-  Card,
-  CardMedia,
-  CardContent,
-  Typography,
-  IconButton,
-  Avatar,
-  Chip,
-  Dialog,
-  DialogContent,
-  TextField,
-  Button,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Fab,
-  Grid
+  Box, Card, CardMedia, CardContent, Typography, IconButton, Avatar,
+  Chip, Dialog, DialogContent, TextField, Button, List, ListItem,
+  ListItemAvatar, ListItemText, Fab, Grid, InputAdornment
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -27,6 +12,12 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import PersonIcon from '@mui/icons-material/Person';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import SearchIcon from '@mui/icons-material/Search';
+import ReplyIcon from '@mui/icons-material/Reply';
 
 function Feed() {
   const [feeds, setFeeds] = useState([]);
@@ -34,66 +25,211 @@ function Feed() {
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
-  const [category, setCategory] = useState('share'); // share/daily/vent
-  const [filter, setFilter] = useState('team'); // team/location/all
+  const [category, setCategory] = useState('group');
+  const [filter, setFilter] = useState('all');
+  const [currentUserId, setCurrentUserId] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [replyToUser, setReplyToUser] = useState(null);
   
   let navigate = useNavigate();
 
-  function fnFeeds() {
+  useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       const decoded = jwtDecode(token);
-      fetch("http://localhost:3010/feed/" + decoded.userId)
-        .then(res => res.json())
-        .then(data => {
-          setFeeds(data.list);
-        });
+      setCurrentUserId(decoded.userId);
     } else {
       alert("로그인 후 이용해주세요.");
       navigate("/");
     }
+  }, [navigate]);
+
+  function fnFeeds() {
+    if (!currentUserId) return;
+    
+    let params = new URLSearchParams({
+      feedType: category,
+      userId: currentUserId
+    });
+    
+    if (filter !== 'team') {
+      params.append('filter', filter);
+    }
+    
+    if (searchQuery.trim()) {
+      params.append('search', searchQuery.trim());
+    }
+    
+    let url = `http://localhost:3010/feed?${params.toString()}`;
+    
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        setFeeds(data.list || []);
+      })
+      .catch(err => {
+        console.error('Failed to fetch feeds:', err);
+      });
   }
 
   useEffect(() => {
+    if (currentUserId) {
+      fnFeeds();
+    }
+  }, [category, filter, currentUserId]);
+
+  const handleSearch = () => {
     fnFeeds();
-  }, []);
+  };
+
+  const fetchComments = (feedId) => {
+    fetch(`http://localhost:3010/feed/${feedId}/comments`)
+      .then(res => res.json())
+      .then(data => {
+        setComments(data.comments || []);
+      })
+      .catch(err => {
+        console.error('Failed to fetch comments:', err);
+      });
+  };
 
   const handleClickOpen = (feed) => {
     setSelectedFeed(feed);
     setOpen(true);
-    setComments([
-      { id: 'user1', text: '멋진 사진이에요!' },
-      { id: 'user2', text: '이 장소에 가보고 싶네요!' },
-    ]);
+    setCurrentImageIndex(0);
+    fetchComments(feed.feedId);
     setNewComment('');
+    setReplyToUser(null);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedFeed(null);
     setComments([]);
+    setCurrentImageIndex(0);
+    setReplyToUser(null);
+  };
+
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? selectedFeed.images.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = (e) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => 
+      prev === selectedFeed.images.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const handleReply = (comment) => {
+    setReplyToUser({
+      userId: comment.userId,
+      nickname: comment.nickname
+    });
+    setNewComment(`@${comment.nickname} `);
   };
 
   const handleAddComment = () => {
-    if (newComment.trim()) {
-      setComments([...comments, { id: 'currentUser', text: newComment }]);
-      setNewComment('');
-    }
+    if (!newComment.trim()) return;
+    
+    fetch(`http://localhost:3010/feed/${selectedFeed.feedId}/comment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({
+        userId: currentUserId,
+        content: newComment,
+        replyToUserId: replyToUser?.userId || null
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        setNewComment('');
+        setReplyToUser(null);
+        fetchComments(selectedFeed.feedId);
+        setFeeds(feeds.map(f => 
+          f.feedId === selectedFeed.feedId 
+            ? {...f, commentCnt: f.commentCnt + 1}
+            : f
+        ));
+      })
+      .catch(err => {
+        console.error('Failed to add comment:', err);
+        alert('댓글 작성에 실패했습니다.');
+      });
   };
 
-  const handleLike = (feedId) => {
-    // TODO: 实现点赞逻辑
-    console.log('Like feed:', feedId);
+  const handleLike = (feedId, e) => {
+    e.stopPropagation();
+    
+    fetch(`http://localhost:3010/feed/${feedId}/like`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({ userId: currentUserId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        setFeeds(feeds.map(f => {
+          if (f.feedId === feedId) {
+            return {
+              ...f,
+              likeCnt: data.liked ? f.likeCnt + 1 : f.likeCnt - 1,
+              isLiked: data.liked
+            };
+          }
+          return f;
+        }));
+      })
+      .catch(err => {
+        console.error('Failed to like:', err);
+      });
   };
 
-  const handleBookmark = (feedId) => {
-    // TODO: 实现收藏逻辑
-    console.log('Bookmark feed:', feedId);
+  const handleBookmark = (feedId, e) => {
+    e.stopPropagation();
+    
+    fetch(`http://localhost:3010/feed/${feedId}/favorite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({ userId: currentUserId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        setFeeds(feeds.map(f => {
+          if (f.feedId === feedId) {
+            return {
+              ...f,
+              favorCnt: data.favorited ? f.favorCnt + 1 : f.favorCnt - 1,
+              isFavorited: data.favorited
+            };
+          }
+          return f;
+        }));
+      })
+      .catch(err => {
+        console.error('Failed to bookmark:', err);
+      });
+  };
+
+  const handleAvatarClick = (userId, e) => {
+    e.stopPropagation();
+    navigate(`/profile/${userId}`);
   };
 
   return (
     <Box sx={{ bgcolor: '#E2E2E2', minHeight: '100vh', pb: 10 }}>
-      {/* 顶部筛选栏 */}
       <Box 
         sx={{ 
           bgcolor: '#F0F0F0',
@@ -104,27 +240,55 @@ function Feed() {
           boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
         }}
       >
-        <Typography 
-          variant="h5" 
-          sx={{ 
-            fontWeight: 600, 
-            mb: 2,
-            color: '#1A1A1A'
-          }}
-        >
-          Feed
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: '#1A1A1A' }}>
+          편하게 둘러봐 ~
         </Typography>
         
-        {/* 分类标签 */}
+        {/* 搜索框 */}
+        <TextField
+          placeholder="제목이나 내용으로 검색..."
+          size="small"
+          width="50"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              handleSearch();
+            }
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: '#666' }} />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery && (
+              <InputAdornment position="end">
+                <IconButton size="small" onClick={() => { setSearchQuery(''); fnFeeds(); }}>
+                  <CloseIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              </InputAdornment>
+            )
+          }}
+          sx={{ 
+            mb: 2,
+            bgcolor: '#fff',
+            borderRadius: '12px',
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '12px'
+            }
+          }}
+        />
+        
         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
           <Chip 
-            label="분석구역" 
-            onClick={() => setCategory('share')}
+            label="운동구역" 
+            onClick={() => setCategory('group')}
             sx={{ 
-              bgcolor: category === 'share' ? '#96ACC1' : '#fff',
-              color: category === 'share' ? '#fff' : '#666',
+              bgcolor: category === 'group' ? '#96ACC1' : '#fff',
+              color: category === 'group' ? '#fff' : '#666',
               fontWeight: 500,
-              '&:hover': { bgcolor: category === 'share' ? '#7A94A8' : '#f5f5f5' }
+              '&:hover': { bgcolor: category === 'group' ? '#7A94A8' : '#f5f5f5' }
             }}
           />
           <Chip 
@@ -149,16 +313,19 @@ function Feed() {
           />
         </Box>
 
-        {/* 筛选器 */}
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Chip 
             label="팀 동태" 
             onClick={() => setFilter('team')}
             size="small"
+            disabled
             sx={{ 
               bgcolor: filter === 'team' ? '#96ACC1' : '#fff',
-              color: filter === 'team' ? '#fff' : '#666',
-              '&:hover': { bgcolor: filter === 'team' ? '#7A94A8' : '#f5f5f5' }
+              color: filter === 'team' ? '#fff' : '#999',
+              '&.Mui-disabled': {
+                bgcolor: '#f5f5f5',
+                color: '#ccc'
+              }
             }}
           />
           <Chip 
@@ -184,12 +351,11 @@ function Feed() {
         </Box>
       </Box>
 
-      {/* Grid 布局笔记展示 */}
       <Box sx={{ padding: '20px' }}>
         {feeds.length > 0 ? (
-          <Grid container spacing={2}>
+          <Grid container spacing={2.5}>
             {feeds.map((feed) => (
-              <Grid item xs={6} sm={4} md={3} key={feed.id}>
+              <Grid item xs={6} sm={4} md={3} key={feed.feedId}>
                 <Card 
                   sx={{ 
                     borderRadius: '16px',
@@ -197,48 +363,75 @@ function Feed() {
                     bgcolor: '#fff',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                     transition: 'all 0.3s',
+                    cursor: 'pointer',
                     '&:hover': {
                       transform: 'translateY(-4px)',
                       boxShadow: '0 8px 16px rgba(150, 172, 193, 0.2)'
                     }
                   }}
+                  onClick={() => handleClickOpen(feed)}
                 >
-                  <CardMedia
-                    component="img"
-                    image={feed.imgPath}
-                    alt={feed.imgName}
-                    onClick={() => handleClickOpen(feed)}
-                    sx={{ 
-                      cursor: 'pointer',
-                      aspectRatio: '1',
-                      objectFit: 'cover'
-                    }}
-                  />
+                  {feed.thumbnail && (
+                    <CardMedia
+                      component="img"
+                      image={feed.thumbnail.filePath}
+                      alt={feed.thumbnail.fileName}
+                      sx={{ 
+                        aspectRatio: '1',
+                        objectFit: 'cover',
+                        height: 200
+                      }}
+                    />
+                  )}
+                  
                   <CardContent sx={{ p: 2 }}>
-                    {/* 作者信息 */}
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Avatar 
+                        src={feed.isAnonymous ? null : feed.profileImg}
+                        onClick={(e) => !feed.isAnonymous && handleAvatarClick(feed.userId, e)}
                         sx={{ 
                           width: 28, 
                           height: 28, 
                           mr: 1,
-                          bgcolor: '#96ACC1'
+                          bgcolor: '#333',
+                          cursor: feed.isAnonymous ? 'default' : 'pointer'
                         }}
                       >
-                        {feed.userId?.charAt(0).toUpperCase()}
+                        {feed.isAnonymous ? (
+                          <PersonIcon sx={{ fontSize: 18 }} />
+                        ) : (
+                          (feed.nickname || feed.userId)?.charAt(0).toUpperCase()
+                        )}
                       </Avatar>
                       <Typography 
                         variant="caption" 
                         sx={{ 
                           fontWeight: 600,
-                          color: '#444'
+                          color: '#444',
+                          cursor: feed.isAnonymous ? 'default' : 'pointer'
                         }}
+                        onClick={(e) => !feed.isAnonymous && handleAvatarClick(feed.userId, e)}
                       >
-                        {feed.userId}
+                        {feed.isAnonymous ? '익명' : (feed.nickname || feed.userId)}
                       </Typography>
                     </Box>
 
-                    {/* 标题/内容 */}
+                    {feed.title && (
+                      <Typography 
+                        variant="subtitle2" 
+                        sx={{ 
+                          fontWeight: 600,
+                          color: '#333',
+                          mb: 0.5,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {feed.title}
+                      </Typography>
+                    )}
+
                     <Typography 
                       variant="body2" 
                       sx={{ 
@@ -247,31 +440,41 @@ function Feed() {
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
+                        overflow: 'hidden',
+                        minHeight: '40px'
                       }}
                     >
                       {feed.content}
                     </Typography>
 
-                    {/* 点赞和收藏 */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                       <IconButton 
                         size="small"
-                        onClick={() => handleLike(feed.id)}
-                        sx={{ color: '#96ACC1' }}
+                        onClick={(e) => handleLike(feed.feedId, e)}
+                        sx={{ color: feed.isLiked ? '#960303ff' : '#333' }}
                       >
-                        <FavoriteBorderIcon sx={{ fontSize: 18 }} />
+                        {feed.isLiked ? <FavoriteIcon sx={{ fontSize: 18 }} /> : <FavoriteBorderIcon sx={{ fontSize: 18 }} />}
                       </IconButton>
-                      <Typography variant="caption" sx={{ color: '#666' }}>
-                        {feed.likes || 0}
+                      <Typography variant="caption" sx={{ color: '#666', mr: 1 }}>
+                        {feed.likeCnt || 0}
                       </Typography>
                       
                       <IconButton 
                         size="small"
-                        onClick={() => handleBookmark(feed.id)}
-                        sx={{ color: '#96ACC1', ml: 'auto' }}
+                        sx={{ color: '#333' }}
                       >
-                        <BookmarkBorderIcon sx={{ fontSize: 18 }} />
+                        <ChatBubbleOutlineIcon sx={{ fontSize: 18 }} />
+                      </IconButton>
+                      <Typography variant="caption" sx={{ color: '#666' }}>
+                        {feed.commentCnt || 0}
+                      </Typography>
+                      
+                      <IconButton 
+                        size="small"
+                        onClick={(e) => handleBookmark(feed.feedId, e)}
+                        sx={{ color: feed.isFavorited ? '#FFB800' : '#333', ml: 'auto' }}
+                      >
+                        {feed.isFavorited ? <BookmarkIcon sx={{ fontSize: 18 }} /> : <BookmarkBorderIcon sx={{ fontSize: 18 }} />}
                       </IconButton>
                     </Box>
                   </CardContent>
@@ -280,29 +483,22 @@ function Feed() {
             ))}
           </Grid>
         ) : (
-          <Box 
-            sx={{ 
-              textAlign: 'center', 
-              py: 8,
-              color: '#999'
-            }}
-          >
+          <Box sx={{ textAlign: 'center', py: 8, color: '#999' }}>
             <Typography variant="h6">등록된 피드가 없습니다</Typography>
             <Typography variant="body2">첫 피드를 등록해보세요!</Typography>
           </Box>
         )}
       </Box>
 
-      {/* 固定的 + 按钮 - 内容区域底部居中 */}
       <Fab
         onClick={() => navigate('/register')}
         sx={{
           position: 'fixed',
           bottom: { xs: 20, sm: 24 },
           left: { 
-            xs: '50%', // 手机: 屏幕中间
-            sm: '50%', // 平板: 屏幕中间
-            md: 'calc(240px + (100% - 240px) / 2)' // 桌面: sidebar(240px) + 内容区域的一半
+            xs: '50%',
+            sm: '50%',
+            md: 'calc(240px + (100% - 240px) / 2)'
           },
           transform: 'translateX(-50%)',
           bgcolor: '#96ACC1',
@@ -348,55 +544,168 @@ function Feed() {
         </IconButton>
 
         <DialogContent sx={{ p: 0, display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
-          {/* 左侧图片 */}
-          <Box sx={{ flex: 1, bgcolor: '#000' }}>
-            {selectedFeed?.imgPath && (
-              <img
-                src={selectedFeed.imgPath}
-                alt={selectedFeed.imgName}
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              />
+          <Box sx={{ flex: 1, bgcolor: '#000', minHeight: { xs: '300px', md: '500px' }, position: 'relative' }}>
+            {selectedFeed?.images && selectedFeed.images.length > 0 && (
+              <>
+                <img
+                  key={currentImageIndex}
+                  src={selectedFeed.images[currentImageIndex].filePath}
+                  alt={selectedFeed.images[currentImageIndex].fileName}
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'contain'
+                  }}
+                />
+                
+                {selectedFeed.images.length > 1 && (
+                  <>
+                    <IconButton
+                      onClick={handlePrevImage}
+                      sx={{
+                        position: 'absolute',
+                        left: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        bgcolor: 'rgba(255,255,255,0.8)',
+                        '&:hover': { bgcolor: '#fff' },
+                        zIndex: 2
+                      }}
+                    >
+                      <ChevronLeftIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={handleNextImage}
+                      sx={{
+                        position: 'absolute',
+                        right: 8,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        bgcolor: 'rgba(255,255,255,0.8)',
+                        '&:hover': { bgcolor: '#fff' },
+                        zIndex: 2
+                      }}
+                    >
+                      <ChevronRightIcon />
+                    </IconButton>
+
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        bottom: 16,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        bgcolor: 'rgba(0,0,0,0.6)',
+                        color: '#fff',
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: '12px',
+                        fontSize: '14px'
+                      }}
+                    >
+                      {currentImageIndex + 1} / {selectedFeed.images.length}
+                    </Box>
+                  </>
+                )}
+              </>
             )}
           </Box>
 
-          {/* 右侧评论区 */}
           <Box sx={{ width: { xs: '100%', md: '400px' }, p: 3 }}>
-            {/* 作者信息 */}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Avatar sx={{ bgcolor: '#96ACC1', mr: 2 }}>
-                {selectedFeed?.userId?.charAt(0).toUpperCase()}
+              <Avatar 
+                src={selectedFeed?.isAnonymous ? null : selectedFeed?.profileImg}
+                onClick={(e) => !selectedFeed?.isAnonymous && handleAvatarClick(selectedFeed?.userId, e)}
+                sx={{ 
+                  bgcolor: '#96ACC1', 
+                  mr: 2,
+                  cursor: selectedFeed?.isAnonymous ? 'default' : 'pointer'
+                }}
+              >
+                {selectedFeed?.isAnonymous ? (
+                  <PersonIcon />
+                ) : (
+                  (selectedFeed?.nickname || selectedFeed?.userId)?.charAt(0).toUpperCase()
+                )}
               </Avatar>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                {selectedFeed?.userId}
+              <Typography 
+                variant="subtitle1" 
+                sx={{ 
+                  fontWeight: 600,
+                  cursor: selectedFeed?.isAnonymous ? 'default' : 'pointer'
+                }}
+                onClick={(e) => !selectedFeed?.isAnonymous && handleAvatarClick(selectedFeed?.userId, e)}
+              >
+                {selectedFeed?.isAnonymous ? '익명 사용자' : (selectedFeed?.nickname || selectedFeed?.userId)}
               </Typography>
             </Box>
 
-            {/* 内容 */}
+            {selectedFeed?.title && (
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
+                {selectedFeed.title}
+              </Typography>
+            )}
+
             <Typography variant="body2" sx={{ mb: 3, color: '#444' }}>
               {selectedFeed?.content}
             </Typography>
 
-            {/* 评论列表 */}
+            <Box sx={{ display: 'flex', gap: 2, mb: 3, pb: 2, borderBottom: '1px solid #eee' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <FavoriteIcon sx={{ fontSize: 18, color: '#FF6B6B' }} />
+                <Typography variant="body2">{selectedFeed?.likeCnt || 0}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <BookmarkIcon sx={{ fontSize: 18, color: '#FFB800' }} />
+                <Typography variant="body2">{selectedFeed?.favorCnt || 0}</Typography>
+              </Box>
+            </Box>
+
             <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-              댓글
+              댓글 ({comments.length})
             </Typography>
             <List sx={{ maxHeight: '300px', overflow: 'auto', mb: 2 }}>
-              {comments.map((comment, index) => (
-                <ListItem key={index} alignItems="flex-start" sx={{ px: 0 }}>
+              {comments.map((comment) => (
+                <ListItem key={comment.commentId} alignItems="flex-start" sx={{ px: 0 }}>
                   <ListItemAvatar>
-                    <Avatar sx={{ width: 32, height: 32, bgcolor: '#96ACC1' }}>
-                      {comment.id.charAt(0).toUpperCase()}
+                    <Avatar 
+                      src={comment.profileImg}
+                      onClick={(e) => handleAvatarClick(comment.userId, e)}
+                      sx={{ width: 32, height: 32, bgcolor: '#96ACC1', cursor: 'pointer' }}
+                    >
+                      {(comment.nickname || comment.userId)?.charAt(0).toUpperCase()}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
                     primary={
-                      <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                        {comment.id}
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography 
+                          variant="caption" 
+                          sx={{ fontWeight: 600, cursor: 'pointer' }}
+                          onClick={(e) => handleAvatarClick(comment.userId, e)}
+                        >
+                          {comment.nickname || comment.userId}
+                        </Typography>
+                        <IconButton 
+                          size="small" 
+                          onClick={() => handleReply(comment)}
+                          sx={{ ml: 'auto' }}
+                        >
+                          <ReplyIcon sx={{ fontSize: 16 }} />
+                        </IconButton>
+                      </Box>
                     }
                     secondary={
                       <Typography variant="body2" sx={{ color: '#666' }}>
-                        {comment.text}
+                        {comment.replyToNickname && (
+                          <Typography 
+                            component="span" 
+                            sx={{ color: '#96ACC1', fontWeight: 600, mr: 0.5 }}
+                          >
+                            
+                          </Typography>
+                        )}
+                        {comment.content}
                       </Typography>
                     }
                   />
@@ -404,7 +713,17 @@ function Feed() {
               ))}
             </List>
 
-            {/* 评论输入 */}
+            {replyToUser && (
+              <Box sx={{ mb: 1, p: 1, bgcolor: '#f5f5f5', borderRadius: '8px', display: 'flex', alignItems: 'center' }}>
+                <Typography variant="caption" sx={{ color: '#666', flex: 1 }}>
+                  {replyToUser.nickname}님에게 답장
+                </Typography>
+                <IconButton size="small" onClick={() => { setReplyToUser(null); setNewComment(''); }}>
+                  <CloseIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+              </Box>
+            )}
+
             <Box sx={{ display: 'flex', gap: 1 }}>
               <TextField
                 placeholder="댓글을 입력하세요"
@@ -413,6 +732,12 @@ function Feed() {
                 fullWidth
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleAddComment();
+                  }
+                }}
                 sx={{ 
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '12px'
@@ -422,10 +747,13 @@ function Feed() {
               <Button
                 variant="contained"
                 onClick={handleAddComment}
+                disabled={!newComment.trim()}
                 sx={{
                   bgcolor: '#96ACC1',
                   borderRadius: '12px',
-                  '&:hover': { bgcolor: '#7A94A8' }
+                  minWidth: '60px',
+                  '&:hover': { bgcolor: '#7A94A8' },
+                  '&:disabled': { bgcolor: '#ccc' }
                 }}
               >
                 추가

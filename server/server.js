@@ -3,7 +3,16 @@ const cors = require('cors')
 const path = require('path');
 const userRouter = require("./routes/user");
 const feedRouter = require("./routes/feed");
+
+
+
+const notificationRouter = require("./routes/notification");
+
+
+
 const app = express()
+
+
 
 app.use(cors({
     origin : "*",
@@ -15,6 +24,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/user", userRouter);
 app.use("/feed", feedRouter);
+
+app.use("/notification", notificationRouter);
 
 
 app.listen(3010, ()=>{

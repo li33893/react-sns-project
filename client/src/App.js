@@ -9,6 +9,10 @@ import MyPage from './components/MyPage';
 import Menu from './components/Menu'; // Menu로 변경
 import Mui from './components/Mui';
 
+import Notifications from './components/Notifications';
+
+
+
 function App() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/' || location.pathname === '/join';
@@ -24,7 +28,9 @@ function App() {
           <Route path="/feed" element={<Feed />} />
           <Route path="/register" element={<Register />} />
           <Route path="/mypage" element={<MyPage />} />
+          <Route path="/profile/:userId" element={<MyPage />} />
           <Route path="/mui" element={<Mui />} />
+          <Route path="/notifications" element={<Notifications />} />
         </Routes>
       </Box>
     </Box>
