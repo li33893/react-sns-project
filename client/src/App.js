@@ -10,6 +10,12 @@ import Menu from './components/Menu'; // Menu로 변경
 import Mui from './components/Mui';
 
 import Notifications from './components/Notifications';
+import Groups from './components/Group';
+import GroupDetail from './components/GroupDetail';
+import CreateGroup from './components/CreateGroup';
+import Activity from './components/Activity';
+
+
 
 
 
@@ -31,6 +37,10 @@ function App() {
           <Route path="/profile/:userId" element={<MyPage />} />
           <Route path="/mui" element={<Mui />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/group" element={<Groups />} />
+          <Route path="/group/create" element={<CreateGroup />} />
+          <Route path="/group/:groupId" element={<GroupDetail />} />
+          <Route path="/group/:groupId/activity" element={<Activity />} />
         </Routes>
       </Box>
     </Box>

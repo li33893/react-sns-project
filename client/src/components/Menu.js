@@ -144,29 +144,7 @@ function Menu() {
           />
         </ListItem>
 
-        <ListItem 
-          button 
-          component={Link} 
-          to="/register"
-          sx={{
-            borderRadius: '12px',
-            mb: 1,
-            '&:hover': {
-              bgcolor: '#F5F5F5'
-            }
-          }}
-        >
-          <ListItemIcon sx={{ minWidth: 40 }}>
-            <Add sx={{ color: '#333' }} />
-          </ListItemIcon>
-          <ListItemText 
-            primary="새 피드" 
-            primaryTypographyProps={{
-              fontWeight: 500,
-              color: '#333'
-            }}
-          />
-        </ListItem>
+        
 
         <ListItem 
           button 
@@ -231,7 +209,7 @@ function Menu() {
         <ListItem 
           button 
           component={Link} 
-          to="/groups"
+          to="/group"
           sx={{
             borderRadius: '12px',
             mb: 1,
@@ -245,6 +223,31 @@ function Menu() {
           </ListItemIcon>
           <ListItemText 
             primary="팀" 
+            primaryTypographyProps={{
+              fontWeight: 500,
+              color: '#333'
+            }}
+          />
+        </ListItem>
+
+
+        <ListItem 
+          button 
+          component={Link} 
+          to="/group/create"
+          sx={{
+            borderRadius: '12px',
+            mb: 1,
+            '&:hover': {
+              bgcolor: '#F5F5F5'
+            }
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 40 }}>
+            <Add sx={{ color: '#333' }} />
+          </ListItemIcon>
+          <ListItemText 
+            primary="팀 생성하러 가기" 
             primaryTypographyProps={{
               fontWeight: 500,
               color: '#333'

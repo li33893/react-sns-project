@@ -5,6 +5,9 @@ const userRouter = require("./routes/user");
 const feedRouter = require("./routes/feed");
 
 
+const groupRouter = require('./routes/group');
+
+
 
 const notificationRouter = require("./routes/notification");
 
@@ -25,6 +28,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/user", userRouter);
 app.use("/feed", feedRouter);
 
+app.use('/group', groupRouter);
 app.use("/notification", notificationRouter);
 
 
