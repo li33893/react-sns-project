@@ -3,7 +3,7 @@ import {
   Typography, Box, Avatar, Grid, IconButton, Tabs, Tab, Card,
   CardMedia, CardContent, Dialog, DialogTitle, DialogContent,
   DialogActions, TextField, Button, Menu, MenuItem, List, ListItem,
-  ListItemAvatar, ListItemText, Divider
+  ListItemAvatar, ListItemText, Divider, Chip  // 添加 Chip
 } from '@mui/material';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate, useParams } from 'react-router-dom';
@@ -47,7 +47,8 @@ function MyPage() {
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [comments, setComments] = useState([]);
-  
+  const [myGroups, setMyGroups] = useState([]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,7 +56,7 @@ function MyPage() {
     if (token) {
       const decoded = jwtDecode(token);
       setCurrentUserId(decoded.userId);
-      
+
       // URL에 userId가 없으면 본인 프로필
       const targetUserId = profileUserId || decoded.userId;
       setIsOwnProfile(targetUserId === decoded.userId);
@@ -114,8 +115,10 @@ function MyPage() {
     if (currentUserId) {
       if (tabValue === 0) {
         fetchMyFeeds();
-      } else {
+      } else if (tabValue === 1) {
         fetchFavoriteFeeds();
+      } else if (tabValue === 2) {
+        fetchMyGroups();
       }
     }
   }, [tabValue, currentUserId, profileUserId]);
@@ -204,6 +207,20 @@ function MyPage() {
       });
   };
 
+  const fetchMyGroups = () => {
+    const targetUserId = profileUserId || currentUserId;
+    fetch(`http://localhost:3010/group?leaderId=${targetUserId}&status=all`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.result === 'success') {
+          // 过滤出当前用户作为队长的队伍
+          const leaderGroups = data.groups.filter(g => g.leaderId === targetUserId);
+          setMyGroups(leaderGroups);
+        }
+      })
+      .catch(err => console.error(err));
+  };
+
   const handleFeedClick = (feed) => {
     setSelectedFeed(feed);
     setFeedDialogOpen(true);
@@ -220,14 +237,14 @@ function MyPage() {
 
   const handlePrevImage = (e) => {
     e.stopPropagation();
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? selectedFeed.images.length - 1 : prev - 1
     );
   };
 
   const handleNextImage = (e) => {
     e.stopPropagation();
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === selectedFeed.images.length - 1 ? 0 : prev + 1
     );
   };
@@ -319,7 +336,7 @@ function MyPage() {
             <IconButton onClick={() => navigate(-1)}>
               <ArrowBackIcon />
             </IconButton>
-            
+
             {isOwnProfile ? (
               <IconButton
                 onClick={handleEditOpen}
@@ -419,11 +436,11 @@ function MyPage() {
               </Box>
             </Grid>
             <Grid item xs={4}>
-              <Box 
-                sx={{ 
-                  textAlign: 'center', 
-                  p: 2, 
-                  bgcolor: '#fff', 
+              <Box
+                sx={{
+                  textAlign: 'center',
+                  p: 2,
+                  bgcolor: '#fff',
                   borderRadius: '12px',
                   cursor: 'pointer',
                   '&:hover': { bgcolor: '#f5f5f5' }
@@ -439,11 +456,11 @@ function MyPage() {
               </Box>
             </Grid>
             <Grid item xs={4}>
-              <Box 
-                sx={{ 
-                  textAlign: 'center', 
-                  p: 2, 
-                  bgcolor: '#fff', 
+              <Box
+                sx={{
+                  textAlign: 'center',
+                  p: 2,
+                  bgcolor: '#fff',
                   borderRadius: '12px',
                   cursor: 'pointer',
                   '&:hover': { bgcolor: '#f5f5f5' }
@@ -483,94 +500,187 @@ function MyPage() {
         >
           <Tab label={isOwnProfile ? "내 피드" : "피드"} />
           <Tab label="저장한 피드" />
+          <Tab label={isOwnProfile ? "내 팀" : "팀"} />  {/* 新增 */}
         </Tabs>
 
         {/* Feed Grid */}
-        {feeds.length > 0 ? (
-          <Grid container spacing={2}>
-            {feeds.map((feed) => (
-              <Grid item xs={6} sm={4} key={feed.feedId}>
-                <Card
-                  sx={{
-                    borderRadius: '16px',
-                    cursor: 'pointer',
-                    position: 'relative',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 8px 16px rgba(150, 172, 193, 0.2)'
-                    },
-                    transition: 'all 0.3s'
-                  }}
-                  onClick={() => handleFeedClick(feed)}
-                >
-                  {isOwnProfile && tabValue === 0 && (
-                    <IconButton
-                      onClick={(e) => handleMenuOpen(e, feed.feedId)}
-                      sx={{
-                        position: 'absolute',
-                        top: 8,
-                        right: 8,
-                        bgcolor: 'rgba(255,255,255,0.9)',
-                        zIndex: 1,
-                        '&:hover': { bgcolor: '#fff' }
-                      }}
-                      size="small"
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                  )}
-                  
-                  {feed.thumbnail && (
-                    <CardMedia
-                      component="img"
-                      image={feed.thumbnail.filePath}
-                      alt={feed.thumbnail.fileName}
-                      sx={{
-                        aspectRatio: '1',
-                        objectFit: 'cover',
-                        height: 200
-                      }}
-                    />
-                  )}
-                  
-                  <CardContent sx={{ p: 2 }}>
-                    {feed.title && (
-                      <Typography
-                        variant="subtitle2"
+        {tabValue < 2 ? (
+          // 피드 표시 (Tab 0, 1)
+          feeds.length > 0 ? (
+            <Grid container spacing={2}>
+              {feeds.map((feed) => (
+                <Grid item xs={6} sm={4} key={feed.feedId}>
+                  <Card
+                    sx={{
+                      borderRadius: '16px',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 16px rgba(150, 172, 193, 0.2)'
+                      },
+                      transition: 'all 0.3s'
+                    }}
+                    onClick={() => handleFeedClick(feed)}
+                  >
+                    {isOwnProfile && tabValue === 0 && (
+                      <IconButton
+                        onClick={(e) => handleMenuOpen(e, feed.feedId)}
                         sx={{
-                          fontWeight: 600,
-                          mb: 0.5,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          bgcolor: 'rgba(255,255,255,0.9)',
+                          zIndex: 1,
+                          '&:hover': { bgcolor: '#fff' }
+                        }}
+                        size="small"
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    )}
+
+                    {feed.thumbnail && (
+                      <CardMedia
+                        component="img"
+                        image={feed.thumbnail.filePath}
+                        alt={feed.thumbnail.fileName}
+                        sx={{
+                          aspectRatio: '1',
+                          objectFit: 'cover',
+                          height: 200
+                        }}
+                      />
+                    )}
+
+                    <CardContent sx={{ p: 2 }}>
+                      {feed.title && (
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontWeight: 600,
+                            mb: 0.5,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {feed.title}
+                        </Typography>
+                      )}
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: '#666',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
                         }}
                       >
-                        {feed.title}
+                        {feed.content}
                       </Typography>
-                    )}
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: '#666',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}
-                    >
-                      {feed.content}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Box sx={{ textAlign: 'center', py: 8, color: '#999' }}>
+              <Typography variant="h6">
+                {tabValue === 0 ? '등록된 피드가 없습니다' : '저장한 피드가 없습니다'}
+              </Typography>
+            </Box>
+          )
         ) : (
-          <Box sx={{ textAlign: 'center', py: 8, color: '#999' }}>
-            <Typography variant="h6">
-              {tabValue === 0 ? '등록된 피드가 없습니다' : '저장한 피드가 없습니다'}
-            </Typography>
-          </Box>
+          // 팀 목록 표시 (Tab 2)
+          myGroups.length > 0 ? (
+            <Grid container spacing={2}>
+              {myGroups.map((group) => (
+                <Grid item xs={12} key={group.groupId}>
+                  <Card
+                    sx={{
+                      borderRadius: '16px',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 16px rgba(150, 172, 193, 0.2)'
+                      },
+                      transition: 'all 0.3s'
+                    }}
+                    onClick={() => navigate(`/group/${group.groupId}`)}
+                  >
+                    <CardContent sx={{ p: 3 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                            {group.groupName}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
+                            {group.routeName}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#999' }}>
+                            {group.district} · {group.startLocation} → {group.endLocation}
+                          </Typography>
+                        </Box>
+                        <Chip
+                          label={
+                            group.status === 'recruiting' ? '모집중' :
+                              group.status === 'full' ? '모집완료' :
+                                group.status === 'active' ? '진행중' : '종료'
+                          }
+                          sx={{
+                            bgcolor: group.status === 'recruiting' ? '#4CAF50' : '#FF9800',
+                            color: '#fff',
+                            fontWeight: 600
+                          }}
+                        />
+                      </Box>
+
+                      <Divider sx={{ my: 2 }} />
+
+                      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                        <Chip
+                          label={`${group.totalDistance}km`}
+                          size="small"
+                          sx={{ bgcolor: '#F5F5F5' }}
+                        />
+                        <Chip
+                          label={`약 ${group.estimatedTime}분`}
+                          size="small"
+                          sx={{ bgcolor: '#F5F5F5' }}
+                        />
+                        <Chip
+                          label={`${group.currentMembers}/${group.maxMembers}명`}
+                          size="small"
+                          sx={{ bgcolor: '#96ACC1', color: '#fff' }}
+                        />
+                        <Chip
+                          label={
+                            group.intensityLevel === 'beginner' ? '초급' :
+                              group.intensityLevel === 'intermediate' ? '중급' : '고급'
+                          }
+                          size="small"
+                          sx={{
+                            bgcolor:
+                              group.intensityLevel === 'beginner' ? '#4CAF50' :
+                                group.intensityLevel === 'intermediate' ? '#FF9800' : '#F44336',
+                            color: '#fff'
+                          }}
+                        />
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Box sx={{ textAlign: 'center', py: 8, color: '#999' }}>
+              <Typography variant="h6">
+                팀장으로 있는 팀이 없습니다
+              </Typography>
+            </Box>
+          )
         )}
       </Box>
 
@@ -583,21 +693,21 @@ function MyPage() {
             fullWidth
             margin="normal"
             value={editForm.nickName}
-            onChange={(e) => setEditForm({...editForm, nickName: e.target.value})}
+            onChange={(e) => setEditForm({ ...editForm, nickName: e.target.value })}
           />
           <TextField
             label="주소"
             fullWidth
             margin="normal"
             value={editForm.addr}
-            onChange={(e) => setEditForm({...editForm, addr: e.target.value})}
+            onChange={(e) => setEditForm({ ...editForm, addr: e.target.value })}
           />
           <TextField
             label="기저질환"
             fullWidth
             margin="normal"
             value={editForm.comorbidity}
-            onChange={(e) => setEditForm({...editForm, comorbidity: e.target.value})}
+            onChange={(e) => setEditForm({ ...editForm, comorbidity: e.target.value })}
           />
           <TextField
             label="소개"
@@ -606,7 +716,7 @@ function MyPage() {
             multiline
             rows={3}
             value={editForm.intro}
-            onChange={(e) => setEditForm({...editForm, intro: e.target.value})}
+            onChange={(e) => setEditForm({ ...editForm, intro: e.target.value })}
           />
         </DialogContent>
         <DialogActions>
@@ -649,7 +759,7 @@ function MyPage() {
                   alt={selectedFeed.images[currentImageIndex].fileName}
                   style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 />
-                
+
                 {selectedFeed.images.length > 1 && (
                   <>
                     <IconButton
@@ -733,7 +843,7 @@ function MyPage() {
               {comments.map((comment) => (
                 <ListItem key={comment.commentId} alignItems="flex-start" sx={{ px: 0 }}>
                   <ListItemAvatar>
-                    <Avatar 
+                    <Avatar
                       src={comment.profileImg}
                       sx={{ width: 32, height: 32, bgcolor: '#96ACC1' }}
                     >
@@ -750,7 +860,7 @@ function MyPage() {
                       <Typography variant="body2" sx={{ color: '#666' }}>
                         {comment.replyToNickname && (
                           <Typography component="span" sx={{ color: '#96ACC1', fontWeight: 600, mr: 0.5 }}>
-                          
+
                           </Typography>
                         )}
                         {comment.content}
@@ -770,9 +880,9 @@ function MyPage() {
         <DialogContent>
           <List>
             {followers.map((follower) => (
-              <ListItem 
-                key={follower.userId} 
-                button 
+              <ListItem
+                key={follower.userId}
+                button
                 onClick={() => handleUserClick(follower.userId)}
               >
                 <ListItemAvatar>
@@ -796,9 +906,9 @@ function MyPage() {
         <DialogContent>
           <List>
             {following.map((user) => (
-              <ListItem 
-                key={user.userId} 
-                button 
+              <ListItem
+                key={user.userId}
+                button
                 onClick={() => handleUserClick(user.userId)}
               >
                 <ListItemAvatar>

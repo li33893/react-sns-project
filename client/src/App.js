@@ -14,6 +14,7 @@ import Groups from './components/Group';
 import GroupDetail from './components/GroupDetail';
 import CreateGroup from './components/CreateGroup';
 import Activity from './components/Activity';
+import GroupApplications from './components/GroupApplications';
 
 
 
@@ -41,6 +42,7 @@ function App() {
           <Route path="/group/create" element={<CreateGroup />} />
           <Route path="/group/:groupId" element={<GroupDetail />} />
           <Route path="/group/:groupId/activity" element={<Activity />} />
+          <Route path="/group/:groupId/applications" element={<GroupApplications />} />
         </Routes>
       </Box>
     </Box>

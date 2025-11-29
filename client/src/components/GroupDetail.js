@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import {
     Box, Typography, Card, CardContent, Avatar, Chip, Button,
-    IconButton, List, ListItem, ListItemAvatar, ListItemText,
+    IconButton, List, ListItem, ListItemAvatar, ListItemText,  // 添加 ListItem
     Dialog, DialogTitle, DialogContent, DialogActions, TextField,
-    Divider, Grid, Paper
+    Divider, Grid, Paper, Badge
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -14,12 +14,14 @@ import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import PeopleIcon from '@mui/icons-material/People';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 function GroupDetail() {
     const { groupId } = useParams();
     const navigate = useNavigate();
     const [group, setGroup] = useState(null);
     const [currentUserId, setCurrentUserId] = useState('');
+    const [pendingApplicationCount, setPendingApplicationCount] = useState(0);
     const [applyDialogOpen, setApplyDialogOpen] = useState(false);
     const [applicationForm, setApplicationForm] = useState({
         preferredSegmentId: '',
@@ -38,14 +40,19 @@ function GroupDetail() {
             alert("로그인 후 이용해주세요.");
             navigate("/");
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [groupId, navigate]);
 
-    const fetchGroupDetail = (userId) => {
+    const fetchGroupDetail = React.useCallback((userId) => {
         fetch(`http://localhost:3010/group/${groupId}?userId=${userId}`)
             .then(res => res.json())
             .then(data => {
                 if (data.result === 'success') {
                     setGroup(data.group);
+                    // 如果当前用户是队长，获取待审核申请数量
+                    if (data.group.userStatus.isLeader) {
+                        fetchPendingApplications(userId);
+                    }
                 } else {
                     alert('팀 정보를 불러올 수 없습니다.');
                     navigate('/groups');
@@ -54,7 +61,55 @@ function GroupDetail() {
             .catch(err => {
                 console.error('Failed to fetch group detail:', err);
             });
-    };
+    }, [groupId, navigate]);
+
+    const fetchPendingApplications = React.useCallback((leaderId) => {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            console.error('❌ No token found in localStorage');
+            return;
+        }
+
+        const url = `http://localhost:3010/group/${groupId}/applications?leaderId=${leaderId}`;
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => {
+                if (res.status === 401) {
+                    return res.json().then(data => {
+                        console.error('Error message from server:', data);
+                        return null;
+                    });
+                }
+                if (res.status === 403) {
+                    setPendingApplicationCount(0);
+                    return null;
+                }
+                if (!res.ok) {
+                    return null;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data && data.result === 'success') {
+                    const pendingCount = data.applications.filter(app => app.status === 'pending').length;
+                    setPendingApplicationCount(pendingCount);
+                } else if (data && data.result === 'fail') {
+                    setPendingApplicationCount(0);
+                }
+            })
+            .catch(err => {
+                console.error('❌ Failed to fetch applications:', err);
+                setPendingApplicationCount(0);
+            });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [groupId]);
 
     const handleApplyClick = () => {
         setApplyDialogOpen(true);
@@ -91,6 +146,10 @@ function GroupDetail() {
                 console.error('Apply failed:', err);
                 alert('신청 실패');
             });
+    };
+
+    const handleViewApplications = () => {
+        navigate(`/group/${groupId}/applications`);
     };
 
     const getIntensityLabel = (level) => {
@@ -167,6 +226,32 @@ function GroupDetail() {
                 <Typography variant="h6" sx={{ fontWeight: 600, flex: 1 }}>
                     팀 상세정보
                 </Typography>
+                
+                {/* 申请管理按钮 - 只有队长可见 */}
+                {group.userStatus.isLeader && (
+                    <IconButton 
+                        onClick={handleViewApplications}
+                        sx={{ 
+                            bgcolor: pendingApplicationCount > 0 ? '#FFF3E0' : 'transparent',
+                            '&:hover': { bgcolor: '#FFE0B2' }
+                        }}
+                    >
+                        <Badge 
+                            badgeContent={pendingApplicationCount} 
+                            color="error"
+                            sx={{
+                                '& .MuiBadge-badge': {
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    minWidth: '20px',
+                                    height: '20px'
+                                }
+                            }}
+                        >
+                            <AssignmentIcon sx={{ color: pendingApplicationCount > 0 ? '#FF9800' : '#666' }} />
+                        </Badge>
+                    </IconButton>
+                )}
             </Box>
 
             <Box sx={{ maxWidth: '1200px', mx: 'auto', p: 3 }}>
@@ -214,11 +299,9 @@ function GroupDetail() {
                                         try {
                                             let weekDaysArray;
 
-                                            // 如果已经是数组，直接使用
                                             if (Array.isArray(group.weekDays)) {
                                                 weekDaysArray = group.weekDays;
                                             }
-                                            // 如果是字符串，尝试解析
                                             else if (typeof group.weekDays === 'string') {
                                                 weekDaysArray = JSON.parse(group.weekDays);
                                             }
@@ -281,6 +364,38 @@ function GroupDetail() {
                                     {group.description}
                                 </Typography>
                             </Box>
+                        )}
+
+                        {/* 队长专属：查看申请按钮 */}
+                        {group.userStatus.isLeader && (
+                            <Button
+                                variant="outlined"
+                                fullWidth
+                                onClick={handleViewApplications}
+                                startIcon={
+                                    <Badge 
+                                        badgeContent={pendingApplicationCount} 
+                                        color="error"
+                                    >
+                                        <AssignmentIcon />
+                                    </Badge>
+                                }
+                                sx={{
+                                    mb: 2,
+                                    py: 1.5,
+                                    borderRadius: '12px',
+                                    fontWeight: 600,
+                                    fontSize: '16px',
+                                    borderColor: '#96ACC1',
+                                    color: '#96ACC1',
+                                    '&:hover': { 
+                                        borderColor: '#7A94A8',
+                                        bgcolor: '#F5F5F5'
+                                    }
+                                }}
+                            >
+                                가입 신청 관리 {pendingApplicationCount > 0 && `(${pendingApplicationCount})`}
+                            </Button>
                         )}
 
                         {/* 申请按钮 */}

@@ -9,17 +9,17 @@ const authMiddleware = require("../auth");
 
 // 创建路线（队长创建队伍时先创建路线）
 router.post("/route", authMiddleware, async (req, res) => {
-    let { 
-        routeName, district, startLocation, endLocation, 
-        totalDistance, estimatedTime, intensityLevel, avgPace, 
-        description, segments, createdBy 
+    let {
+        routeName, district, startLocation, endLocation,
+        totalDistance, estimatedTime, intensityLevel, avgPace,
+        description, segments, createdBy
     } = req.body;
 
     // 验证必填字段
     if (!routeName || !district || !startLocation || !endLocation || !totalDistance || !estimatedTime || !segments || segments.length === 0) {
-        return res.status(400).json({ 
-            result: "fail", 
-            msg: "필수 항목을 입력해주세요 (routeName, district, startLocation, endLocation, totalDistance, estimatedTime, segments)" 
+        return res.status(400).json({
+            result: "fail",
+            msg: "필수 항목을 입력해주세요 (routeName, district, startLocation, endLocation, totalDistance, estimatedTime, segments)"
         });
     }
 
@@ -31,10 +31,10 @@ router.post("/route", authMiddleware, async (req, res) => {
              segmentCount, intensityLevel, avgPace, description, createdBy, cdatetime, udatetime)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
         `;
-        
+
         let [routeResult] = await db.query(routeSql, [
             routeName, district, startLocation, endLocation, totalDistance, estimatedTime,
-            segments.length, intensityLevel || 'intermediate', avgPace || null, 
+            segments.length, intensityLevel || 'intermediate', avgPace || null,
             description || null, createdBy
         ]);
 
@@ -49,7 +49,7 @@ router.post("/route", authMiddleware, async (req, res) => {
                  segmentDistance, estimatedTime, maxTime, cdatetime, udatetime)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
             `;
-            
+
             await db.query(segmentSql, [
                 routeId,
                 i + 1, // segmentOrder
@@ -62,17 +62,17 @@ router.post("/route", authMiddleware, async (req, res) => {
             ]);
         }
 
-        res.json({ 
-            result: "success", 
+        res.json({
+            result: "success",
             routeId: routeId,
-            msg: "경로가 생성되었습니다" 
+            msg: "경로가 생성되었습니다"
         });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ 
-            result: "fail", 
-            msg: "경로 생성 실패", 
-            error: error.message 
+        res.status(500).json({
+            result: "fail",
+            msg: "경로 생성 실패",
+            error: error.message
         });
     }
 });
@@ -115,22 +115,22 @@ router.get("/route/:routeId", async (req, res) => {
 
 // 创建队伍
 router.post("/", authMiddleware, async (req, res) => {
-    let { 
-        groupName, routeId, leaderId, district, 
-        scheduleType, weekDays, startTime, description 
+    let {
+        groupName, routeId, leaderId, district,
+        scheduleType, weekDays, startTime, description
     } = req.body;
 
     if (!groupName || !routeId || !leaderId || !district || !startTime) {
-        return res.status(400).json({ 
-            result: "fail", 
-            msg: "필수 항목을 입력해주세요" 
+        return res.status(400).json({
+            result: "fail",
+            msg: "필수 항목을 입력해주세요"
         });
     }
 
     try {
         // 1. 验证队长的完成率是否 >= 90%
         let [leaderInfo] = await db.query(
-            "SELECT completionRate FROM users_tbl WHERE userId = ?", 
+            "SELECT completionRate FROM users_tbl WHERE userId = ?",
             [leaderId]
         );
 
@@ -139,15 +139,15 @@ router.post("/", authMiddleware, async (req, res) => {
         }
 
         if (leaderInfo[0].completionRate < 90.0) {
-            return res.status(403).json({ 
-                result: "fail", 
-                msg: "팀장이 되려면 완료율이 90% 이상이어야 합니다" 
+            return res.status(403).json({
+                result: "fail",
+                msg: "팀장이 되려면 완료율이 90% 이상이어야 합니다"
             });
         }
 
         // 2. 获取路线信息（确定最大人数）
         let [routeInfo] = await db.query(
-            "SELECT segmentCount FROM TBL_ROUTE WHERE routeId = ?", 
+            "SELECT segmentCount FROM TBL_ROUTE WHERE routeId = ?",
             [routeId]
         );
 
@@ -166,8 +166,8 @@ router.post("/", authMiddleware, async (req, res) => {
         `;
 
         let [groupResult] = await db.query(groupSql, [
-            groupName, routeId, leaderId, district, 
-            scheduleType || 'weekly', 
+            groupName, routeId, leaderId, district,
+            scheduleType || 'weekly',
             weekDays ? JSON.stringify(weekDays) : null,
             startTime, maxMembers, description || null
         ]);
@@ -203,18 +203,18 @@ router.post("/", authMiddleware, async (req, res) => {
             [roomId, leaderId]
         );
 
-        res.json({ 
-            result: "success", 
+        res.json({
+            result: "success",
             groupId: groupId,
             roomId: roomId,
-            msg: "팀이 생성되었습니다" 
+            msg: "팀이 생성되었습니다"
         });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ 
-            result: "fail", 
-            msg: "팀 생성 실패", 
-            error: error.message 
+        res.status(500).json({
+            result: "fail",
+            msg: "팀 생성 실패",
+            error: error.message
         });
     }
 });
@@ -259,13 +259,14 @@ router.get("/", async (req, res) => {
         }
 
         // 按状态筛选
-        if (status) {
+        if (status && status !== "all") {
             sql += " AND G.status = ?";
             params.push(status);
-        } else {
-            // 默认只显示招募中的队伍
-            sql += " AND G.status = 'recruiting'";
-        }
+        } 
+        // else {
+        //     // 默认只显示招募中的队伍
+        //     sql += " AND G.status = 'recruiting'";
+        // }
 
         // 搜索功能
         if (search && search.trim()) {
@@ -341,7 +342,7 @@ router.get("/:groupId", async (req, res) => {
 
         // 4. 检查当前用户是否已申请或已是成员
         let userStatus = { isMember: false, isLeader: false, hasApplied: false, applicationStatus: null };
-        
+
         if (userId) {
             // 检查是否是成员
             let memberCheck = members.find(m => m.userId === userId);
@@ -385,9 +386,9 @@ router.post("/:groupId/apply", authMiddleware, async (req, res) => {
     let { userId, preferredSegmentId, healthInfo, occupation, applicationReason } = req.body;
 
     if (!userId || !preferredSegmentId || !healthInfo || !applicationReason) {
-        return res.status(400).json({ 
-            result: "fail", 
-            msg: "필수 항목을 입력해주세요" 
+        return res.status(400).json({
+            result: "fail",
+            msg: "필수 항목을 입력해주세요"
         });
     }
 
@@ -419,9 +420,9 @@ router.post("/:groupId/apply", authMiddleware, async (req, res) => {
         );
 
         if (segmentMembers[0].count >= 1) {
-            return res.status(400).json({ 
-                result: "fail", 
-                msg: "해당 구간은 이미 배정되었습니다. 다른 구간을 선택해주세요" 
+            return res.status(400).json({
+                result: "fail",
+                msg: "해당 구간은 이미 배정되었습니다. 다른 구간을 선택해주세요"
             });
         }
 
@@ -434,7 +435,7 @@ router.post("/:groupId/apply", authMiddleware, async (req, res) => {
         `;
 
         let [result] = await db.query(applySql, [
-            groupId, userId, preferredSegmentId, healthInfo, 
+            groupId, userId, preferredSegmentId, healthInfo,
             occupation || null, applicationReason
         ]);
 
@@ -463,10 +464,10 @@ router.post("/:groupId/apply", authMiddleware, async (req, res) => {
             ]
         );
 
-        res.json({ 
-            result: "success", 
+        res.json({
+            result: "success",
             applicationId: result.insertId,
-            msg: "신청서가 제출되었습니다" 
+            msg: "신청서가 제출되었습니다"
         });
     } catch (error) {
         console.log(error);
@@ -522,16 +523,16 @@ router.put("/application/:applicationId", authMiddleware, async (req, res) => {
     let { reviewerId, status, rejectionReason, assignedSegmentId } = req.body;
 
     if (!reviewerId || !status || (status !== 'approved' && status !== 'rejected')) {
-        return res.status(400).json({ 
-            result: "fail", 
-            msg: "필수 항목을 입력해주세요 (reviewerId, status)" 
+        return res.status(400).json({
+            result: "fail",
+            msg: "필수 항목을 입력해주세요 (reviewerId, status)"
         });
     }
 
     if (status === 'rejected' && !rejectionReason) {
-        return res.status(400).json({ 
-            result: "fail", 
-            msg: "거절 사유를 입력해주세요" 
+        return res.status(400).json({
+            result: "fail",
+            msg: "거절 사유를 입력해주세요"
         });
     }
 
@@ -577,9 +578,9 @@ router.put("/application/:applicationId", authMiddleware, async (req, res) => {
             );
 
             if (segmentCheck[0].count >= 1) {
-                return res.status(400).json({ 
-                    result: "fail", 
-                    msg: "해당 구간은 이미 배정되었습니다" 
+                return res.status(400).json({
+                    result: "fail",
+                    msg: "해당 구간은 이미 배정되었습니다"
                 });
             }
 
@@ -640,9 +641,9 @@ router.put("/application/:applicationId", authMiddleware, async (req, res) => {
             );
         }
 
-        res.json({ 
-            result: "success", 
-            msg: status === 'approved' ? "승인되었습니다" : "거절되었습니다" 
+        res.json({
+            result: "success",
+            msg: status === 'approved' ? "승인되었습니다" : "거절되었습니다"
         });
     } catch (error) {
         console.log(error);
@@ -677,8 +678,8 @@ router.post("/:groupId/activity/start", authMiddleware, async (req, res) => {
         );
 
         if (ongoingActivity.length > 0) {
-            return res.status(400).json({ 
-                result: "fail", 
+            return res.status(400).json({
+                result: "fail",
                 msg: "이미 진행 중인 활동이 있습니다",
                 activityId: ongoingActivity[0].activityId
             });
@@ -744,10 +745,10 @@ router.post("/:groupId/activity/start", authMiddleware, async (req, res) => {
             [members.length, activityId]
         );
 
-        res.json({ 
-            result: "success", 
+        res.json({
+            result: "success",
             activityId: activityId,
-            msg: "활동이 시작되었습니다" 
+            msg: "활동이 시작되었습니다"
         });
     } catch (error) {
         console.log(error);
@@ -813,7 +814,7 @@ router.get("/:groupId/activity/current", async (req, res) => {
             "SELECT leaderId FROM TBL_GROUP WHERE groupId = ?",
             [groupId]
         );
-        
+
         let isLeader = userId === groupInfo[0]?.leaderId;
 
         res.json({
@@ -894,8 +895,8 @@ router.post("/activity/:activityId/relay", authMiddleware, async (req, res) => {
                 [nextRunner.recordId]
             );
 
-            res.json({ 
-                result: "success", 
+            res.json({
+                result: "success",
                 msg: "다음 주자에게 릴레이했습니다",
                 nextRunner: nextRunner.userId,
                 isOnTime: isOnTime
@@ -911,7 +912,7 @@ router.post("/activity/:activityId/relay", authMiddleware, async (req, res) => {
 
             // 8. 更新所有成员的完成率
             let completedRecords = allRecords.filter(r => r.status === 'completed' || r.status === 'overtime');
-            
+
             for (let r of completedRecords) {
                 await db.query(
                     `UPDATE TBL_GROUP_MEMBER 
@@ -934,8 +935,8 @@ router.post("/activity/:activityId/relay", authMiddleware, async (req, res) => {
                 );
             }
 
-            res.json({ 
-                result: "success", 
+            res.json({
+                result: "success",
                 msg: "활동이 완료되었습니다!",
                 isCompleted: true
             });
@@ -998,8 +999,8 @@ router.post("/activity/:activityId/skip", authMiddleware, async (req, res) => {
             );
         }
 
-        res.json({ 
-            result: "success", 
+        res.json({
+            result: "success",
             msg: `${skipUserId}님을 스킵했습니다`,
             nextRunner: nextRunner?.userId
         });
