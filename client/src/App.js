@@ -31,6 +31,7 @@ function App() {
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/groups" element={<Groups />} />  {/* ✨ 添加这一行 */}
           <Route path="/join" element={<Join />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/register" element={<Register />} />

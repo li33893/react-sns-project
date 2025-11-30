@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import {
     Box, Typography, Card, CardContent, Avatar, Chip, Button,
-    IconButton, List, ListItem, ListItemAvatar, ListItemText,  // 添加 ListItem
+    IconButton, List, ListItem, ListItemAvatar, ListItemText,
     Dialog, DialogTitle, DialogContent, DialogActions, TextField,
-    Divider, Grid, Paper, Badge
+    Divider, Grid, Paper, Badge, MenuItem
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -15,6 +15,9 @@ import PeopleIcon from '@mui/icons-material/People';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+
 
 function GroupDetail() {
     const { groupId } = useParams();
@@ -40,7 +43,6 @@ function GroupDetail() {
             alert("로그인 후 이용해주세요.");
             navigate("/");
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [groupId, navigate]);
 
     const fetchGroupDetail = React.useCallback((userId) => {
@@ -49,7 +51,6 @@ function GroupDetail() {
             .then(data => {
                 if (data.result === 'success') {
                     setGroup(data.group);
-                    // 如果当前用户是队长，获取待审核申请数量
                     if (data.group.userStatus.isLeader) {
                         fetchPendingApplications(userId);
                     }
@@ -65,7 +66,7 @@ function GroupDetail() {
 
     const fetchPendingApplications = React.useCallback((leaderId) => {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
             console.error('❌ No token found in localStorage');
             return;
@@ -108,7 +109,6 @@ function GroupDetail() {
                 console.error('❌ Failed to fetch applications:', err);
                 setPendingApplicationCount(0);
             });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [groupId]);
 
     const handleApplyClick = () => {
@@ -165,6 +165,32 @@ function GroupDetail() {
         }
     };
 
+    const handleStartActivity = () => {
+        if (!window.confirm('릴레이 활동을 시작하시겠습니까?')) return;
+
+        fetch(`http://localhost:3010/group/${groupId}/activity/start`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ userId: currentUserId })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.result === 'success') {
+                    alert(data.msg);
+                    navigate(`/group/${groupId}/activity`);
+                } else {
+                    alert(data.msg);
+                }
+            })
+            .catch(err => {
+                console.error('Start activity failed:', err);
+                alert('활동 시작 실패');
+            });
+    };
+
     const getIntensityColor = (level) => {
         switch (level) {
             case 'beginner':
@@ -205,6 +231,16 @@ function GroupDetail() {
         !group.userStatus.hasApplied &&
         group.status === 'recruiting';
 
+    // ⭐ 筛选出可申请的段（排除段1和最后一段，且未被占用的段）
+    const availableSegments = group.segments.filter((seg, index) => {
+        // 排除第1段（队长的）和最后1段（无需申请）
+        if (index === 0 || index === group.segments.length - 1) {
+            return false;
+        }
+        // 排除已被占用的段
+        return !seg.userId;
+    });
+
     return (
         <Box sx={{ bgcolor: '#E2E2E2', minHeight: '100vh', pb: 4 }}>
             {/* 顶部工具栏 */}
@@ -226,18 +262,18 @@ function GroupDetail() {
                 <Typography variant="h6" sx={{ fontWeight: 600, flex: 1 }}>
                     팀 상세정보
                 </Typography>
-                
+
                 {/* 申请管理按钮 - 只有队长可见 */}
                 {group.userStatus.isLeader && (
-                    <IconButton 
+                    <IconButton
                         onClick={handleViewApplications}
-                        sx={{ 
+                        sx={{
                             bgcolor: pendingApplicationCount > 0 ? '#FFF3E0' : 'transparent',
                             '&:hover': { bgcolor: '#FFE0B2' }
                         }}
                     >
-                        <Badge 
-                            badgeContent={pendingApplicationCount} 
+                        <Badge
+                            badgeContent={pendingApplicationCount}
                             color="error"
                             sx={{
                                 '& .MuiBadge-badge': {
@@ -373,8 +409,8 @@ function GroupDetail() {
                                 fullWidth
                                 onClick={handleViewApplications}
                                 startIcon={
-                                    <Badge 
-                                        badgeContent={pendingApplicationCount} 
+                                    <Badge
+                                        badgeContent={pendingApplicationCount}
                                         color="error"
                                     >
                                         <AssignmentIcon />
@@ -388,7 +424,7 @@ function GroupDetail() {
                                     fontSize: '16px',
                                     borderColor: '#96ACC1',
                                     color: '#96ACC1',
-                                    '&:hover': { 
+                                    '&:hover': {
                                         borderColor: '#7A94A8',
                                         bgcolor: '#F5F5F5'
                                     }
@@ -415,6 +451,53 @@ function GroupDetail() {
                             >
                                 팀 가입 신청하기
                             </Button>
+                        )}
+
+                        {/* 队员专属：开始活动和查看活动按钮 */}
+                        {group.userStatus.isMember && (
+                            <>
+                                {/* 开始活动按钮 - 队伍满员且没有进行中的活动时显示 */}
+                                {group.status === 'full' && !group.hasActiveActivity && (
+                                    <Button
+                                        variant="contained"
+                                        fullWidth
+                                        startIcon={<PlayArrowIcon />}
+                                        onClick={handleStartActivity}
+                                        sx={{
+                                            bgcolor: '#4CAF50',
+                                            py: 1.5,
+                                            borderRadius: '12px',
+                                            fontWeight: 600,
+                                            fontSize: '16px',
+                                            mb: 2,
+                                            '&:hover': { bgcolor: '#45A049' }
+                                        }}
+                                    >
+                                        릴레이 활동 시작하기
+                                    </Button>
+                                )}
+
+                                {/* 查看活动按钮 - 有进行中的活动时显示 */}
+                                {group.hasActiveActivity && (
+                                    <Button
+                                        variant="contained"
+                                        fullWidth
+                                        startIcon={<VisibilityIcon />}
+                                        onClick={() => navigate(`/group/${groupId}/activity`)}
+                                        sx={{
+                                            bgcolor: '#2196F3',
+                                            py: 1.5,
+                                            borderRadius: '12px',
+                                            fontWeight: 600,
+                                            fontSize: '16px',
+                                            mb: 2,
+                                            '&:hover': { bgcolor: '#1976D2' }
+                                        }}
+                                    >
+                                        진행 중인 활동 보기
+                                    </Button>
+                                )}
+                            </>
                         )}
 
                         {group.userStatus.isMember && (
@@ -475,6 +558,13 @@ function GroupDetail() {
                                                     {segment.role === 'leader' && (
                                                         <Chip label="팀장" size="small" sx={{ bgcolor: '#96ACC1', color: '#fff' }} />
                                                     )}
+                                                    {/* ⭐ 标记第1段和最后1段 */}
+                                                    {index === 0 && (
+                                                        <Chip label="팀장 전용" size="small" sx={{ bgcolor: '#E0E0E0', color: '#666' }} />
+                                                    )}
+                                                    {index === group.segments.length - 1 && (
+                                                        <Chip label="마지막 구간" size="small" sx={{ bgcolor: '#FFE0B2', color: '#F57C00' }} />
+                                                    )}
                                                 </Box>
                                             }
                                             secondary={
@@ -493,7 +583,7 @@ function GroupDetail() {
                                                 </>
                                             }
                                         />
-                                        {!segment.userId && (
+                                        {!segment.userId && index !== 0 && index !== group.segments.length - 1 && (
                                             <Chip
                                                 label="모집 중"
                                                 size="small"
@@ -569,6 +659,7 @@ function GroupDetail() {
                         신청서를 작성해주세요. 팀장이 검토 후 승인합니다.
                     </Typography>
 
+                    {/* ⭐ 修改：段位选择（排除段1和最后段） */}
                     <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                         희망 구간 선택 *
                     </Typography>
@@ -578,16 +669,19 @@ function GroupDetail() {
                         margin="dense"
                         value={applicationForm.preferredSegmentId}
                         onChange={(e) => setApplicationForm({ ...applicationForm, preferredSegmentId: e.target.value })}
-                        SelectProps={{ native: true }}
                         sx={{ mb: 2 }}
                     >
-                        <option value="">선택해주세요</option>
-                        {group.segments && group.segments.filter(s => !s.userId).map((segment) => (
-                            <option key={segment.segmentId} value={segment.segmentId}>
+                        <MenuItem value="">선택해주세요</MenuItem>
+                        {availableSegments.map((segment) => (
+                            <MenuItem key={segment.segmentId} value={segment.segmentId}>
                                 {segment.segmentName} ({segment.startPoint} → {segment.endPoint})
-                            </option>
+                            </MenuItem>
                         ))}
                     </TextField>
+
+                    <Typography variant="body2" sx={{ mb: 2, color: '#999', fontSize: '12px' }}>
+                        💡 팁: 선택한 구간이 "주 구간"이 되며, 다음 구간을 함께 달리게 됩니다
+                    </Typography>
 
                     <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                         건강 상태 (특히 기저질환) *
@@ -639,8 +733,11 @@ function GroupDetail() {
                     </Button>
                 </DialogActions>
             </Dialog>
+
         </Box>
+
     );
+
 }
 
 export default GroupDetail;
