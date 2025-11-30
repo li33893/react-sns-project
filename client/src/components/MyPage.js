@@ -3,7 +3,7 @@ import {
   Typography, Box, Avatar, Grid, IconButton, Tabs, Tab, Card,
   CardMedia, CardContent, Dialog, DialogTitle, DialogContent,
   DialogActions, TextField, Button, Menu, MenuItem, List, ListItem,
-  ListItemAvatar, ListItemText, Divider, Chip  // 添加 Chip
+  ListItemAvatar, ListItemText, Divider, Chip
 } from '@mui/material';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate, useParams } from 'react-router-dom';
@@ -18,9 +18,10 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import MessageIcon from '@mui/icons-material/Message';
 
 function MyPage() {
-  const { userId: profileUserId } = useParams(); // URL에서 가져온 userId
+  const { userId: profileUserId } = useParams();
   const [user, setUser] = useState(null);
   const [currentUserId, setCurrentUserId] = useState('');
   const [isOwnProfile, setIsOwnProfile] = useState(false);
@@ -48,6 +49,7 @@ function MyPage() {
   const [following, setFollowing] = useState([]);
   const [comments, setComments] = useState([]);
   const [myGroups, setMyGroups] = useState([]);
+  const [creatingChat, setCreatingChat] = useState(false);
 
   const navigate = useNavigate();
 
@@ -57,7 +59,6 @@ function MyPage() {
       const decoded = jwtDecode(token);
       setCurrentUserId(decoded.userId);
 
-      // URL에 userId가 없으면 본인 프로필
       const targetUserId = profileUserId || decoded.userId;
       setIsOwnProfile(targetUserId === decoded.userId);
       fetchUserInfo(targetUserId, decoded.userId);
@@ -207,13 +208,47 @@ function MyPage() {
       });
   };
 
+  // 创建私聊并跳转
+  const handleSendMessage = async () => {
+    if (creatingChat) return;
+    
+    setCreatingChat(true);
+    try {
+      const targetUserId = profileUserId || currentUserId;
+      
+      const res = await fetch('http://localhost:3010/message/rooms/private', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          userId1: currentUserId,
+          userId2: targetUserId
+        })
+      });
+
+      const data = await res.json();
+      
+      if (data.result === 'success') {
+        navigate(`/messages/${data.roomId}`);
+      } else {
+        alert('채팅방 생성 실패');
+      }
+    } catch (error) {
+      console.error('Failed to create chat:', error);
+      alert('채팅방 생성 실패');
+    } finally {
+      setCreatingChat(false);
+    }
+  };
+
   const fetchMyGroups = () => {
     const targetUserId = profileUserId || currentUserId;
     fetch(`http://localhost:3010/group?leaderId=${targetUserId}&status=all`)
       .then(res => res.json())
       .then(data => {
         if (data.result === 'success') {
-          // 过滤出当前用户作为队长的队伍
           const leaderGroups = data.groups.filter(g => g.leaderId === targetUserId);
           setMyGroups(leaderGroups);
         }
@@ -349,19 +384,33 @@ function MyPage() {
                 <EditIcon />
               </IconButton>
             ) : (
-              <Button
-                variant="contained"
-                startIcon={user?.isFollowing ? <PersonRemoveIcon /> : <PersonAddIcon />}
-                onClick={handleFollow}
-                sx={{
-                  bgcolor: user?.isFollowing ? '#999' : '#96ACC1',
-                  '&:hover': {
-                    bgcolor: user?.isFollowing ? '#777' : '#7A94A8'
-                  }
-                }}
-              >
-                {user?.isFollowing ? '팔로잉' : '팔로우'}
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <IconButton
+                  onClick={handleSendMessage}
+                  disabled={creatingChat}
+                  sx={{
+                    bgcolor: '#FFB800',
+                    color: '#fff',
+                    '&:hover': { bgcolor: '#E5A600' },
+                    '&:disabled': { bgcolor: '#CCC' }
+                  }}
+                >
+                  <MessageIcon />
+                </IconButton>
+                <Button
+                  variant="contained"
+                  startIcon={user?.isFollowing ? <PersonRemoveIcon /> : <PersonAddIcon />}
+                  onClick={handleFollow}
+                  sx={{
+                    bgcolor: user?.isFollowing ? '#999' : '#96ACC1',
+                    '&:hover': {
+                      bgcolor: user?.isFollowing ? '#777' : '#7A94A8'
+                    }
+                  }}
+                >
+                  {user?.isFollowing ? '팔로잉' : '팔로우'}
+                </Button>
+              </Box>
             )}
           </Box>
 
@@ -500,12 +549,11 @@ function MyPage() {
         >
           <Tab label={isOwnProfile ? "내 피드" : "피드"} />
           <Tab label="저장한 피드" />
-          <Tab label={isOwnProfile ? "내 팀" : "팀"} />  {/* 新增 */}
+          <Tab label={isOwnProfile ? "내 팀" : "팀"} />
         </Tabs>
 
         {/* Feed Grid */}
         {tabValue < 2 ? (
-          // 피드 표시 (Tab 0, 1)
           feeds.length > 0 ? (
             <Grid container spacing={2}>
               {feeds.map((feed) => (
@@ -593,7 +641,6 @@ function MyPage() {
             </Box>
           )
         ) : (
-          // 팀 목록 표시 (Tab 2)
           myGroups.length > 0 ? (
             <Grid container spacing={2}>
               {myGroups.map((group) => (
@@ -684,7 +731,7 @@ function MyPage() {
         )}
       </Box>
 
-      {/* 编辑资料弹窗 */}
+      {/* 各种 Dialog - 保持原样 */}
       <Dialog open={editDialogOpen} onClose={handleEditClose} maxWidth="sm" fullWidth>
         <DialogTitle>프로필 수정</DialogTitle>
         <DialogContent>
@@ -860,7 +907,7 @@ function MyPage() {
                       <Typography variant="body2" sx={{ color: '#666' }}>
                         {comment.replyToNickname && (
                           <Typography component="span" sx={{ color: '#96ACC1', fontWeight: 600, mr: 0.5 }}>
-
+                            @{comment.replyToNickname}
                           </Typography>
                         )}
                         {comment.content}
@@ -926,7 +973,6 @@ function MyPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 菜单 */}
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem onClick={handleDeleteClick}>
           <DeleteIcon sx={{ mr: 1, fontSize: 20 }} />
@@ -934,7 +980,6 @@ function MyPage() {
         </MenuItem>
       </Menu>
 
-      {/* 删除确认弹窗 */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>피드 삭제</DialogTitle>
         <DialogContent>

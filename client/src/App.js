@@ -16,6 +16,9 @@ import CreateGroup from './components/CreateGroup';
 import Activity from './components/Activity';
 import GroupApplications from './components/GroupApplications';
 
+import Messages from './components/Messages';
+import ChatRoom from './components/ChatRoom';
+
 
 
 
@@ -44,6 +47,8 @@ function App() {
           <Route path="/group/:groupId" element={<GroupDetail />} />
           <Route path="/group/:groupId/activity" element={<Activity />} />
           <Route path="/group/:groupId/applications" element={<GroupApplications />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/messages/:roomId" element={<ChatRoom />} />
         </Routes>
       </Box>
     </Box>
