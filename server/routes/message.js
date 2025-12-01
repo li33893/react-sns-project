@@ -16,7 +16,7 @@ const upload = multer({ storage });
 // 获取用户的所有聊天室列表
 router.get("/rooms", authMiddleware, async (req, res) => {
     const { userId } = req.query;
-    
+
     if (!userId) {
         return res.status(400).json({ msg: "userId is required" });
     }
@@ -29,27 +29,66 @@ router.get("/rooms", authMiddleware, async (req, res) => {
                 R.roomName,
                 R.relatedGroupId,
                 R.cdatetime,
-                (SELECT COUNT(*) FROM tbl_chat_message M 
-                 WHERE M.roomId = R.roomId 
-                 AND M.cdatetime > COALESCE(CM.lastReadAt, '1970-01-01')
-                 AND M.senderId != ?) as unreadCount,
-                (SELECT content FROM tbl_chat_message 
-                 WHERE roomId = R.roomId 
-                 ORDER BY cdatetime DESC LIMIT 1) as lastMessage,
-                (SELECT cdatetime FROM tbl_chat_message 
-                 WHERE roomId = R.roomId 
-                 ORDER BY cdatetime DESC LIMIT 1) as lastMessageTime,
+
+                -- 未读消息数
+                (
+                    SELECT COUNT(*) 
+                    FROM tbl_chat_message M
+                    WHERE M.roomId = R.roomId
+                    AND M.cdatetime > COALESCE(CM.lastReadAt, '1970-01-01')
+                    AND M.senderId != ?
+                ) AS unreadCount,
+
+                -- 最后一条消息
+                (
+                    SELECT content 
+                    FROM tbl_chat_message 
+                    WHERE roomId = R.roomId 
+                    ORDER BY cdatetime DESC 
+                    LIMIT 1
+                ) AS lastMessage,
+
+                -- 最后一条消息时间
+                (
+                    SELECT cdatetime 
+                    FROM tbl_chat_message 
+                    WHERE roomId = R.roomId 
+                    ORDER BY cdatetime DESC 
+                    LIMIT 1
+                ) AS lastMessageTime,
+
                 G.groupName,
-                G.district
+                G.district,
+
+                -- ⭐ 这里正式修复私聊对象信息
+                U.userId            AS otherUserId,
+                U.nickname          AS otherUserNickname,
+                U.profileImg        AS otherUserProfileImg
+
             FROM tbl_chat_room R
-            INNER JOIN tbl_chat_member CM ON R.roomId = CM.roomId
-            LEFT JOIN tbl_group G ON R.relatedGroupId = G.groupId
+
+            INNER JOIN tbl_chat_member CM 
+                ON R.roomId = CM.roomId
+
+            -- ⭐ 找到“对方”的成员
+            LEFT JOIN tbl_chat_member CM2 
+                ON CM2.roomId = R.roomId 
+            AND CM2.userId != ?
+
+            -- ⭐ 从 users_tbl 取昵称、头像
+            LEFT JOIN users_tbl U
+                ON U.userId = CM2.userId
+
+            LEFT JOIN tbl_group G 
+                ON R.relatedGroupId = G.groupId
+
             WHERE CM.userId = ?
             ORDER BY lastMessageTime DESC, R.cdatetime DESC
         `;
-        
-        const [rooms] = await db.query(sql, [userId, userId]);
-        
+
+
+        const [rooms] = await db.query(sql, [userId, userId, userId]);
+
         res.json({
             rooms,
             result: "success"
@@ -59,6 +98,7 @@ router.get("/rooms", authMiddleware, async (req, res) => {
         res.status(500).json({ msg: "Failed to get chat rooms" });
     }
 });
+
 
 // 获取特定聊天室详情
 router.get("/rooms/:roomId", authMiddleware, async (req, res) => {
@@ -131,7 +171,7 @@ router.post("/rooms/private", authMiddleware, async (req, res) => {
             AND CM2.userId = ?
             AND (SELECT COUNT(*) FROM tbl_chat_member WHERE roomId = R.roomId) = 2
         `;
-        
+
         const [existing] = await db.query(checkSql, [userId1, userId2]);
 
         if (existing.length > 0) {
@@ -197,7 +237,7 @@ router.get("/rooms/:roomId/messages", authMiddleware, async (req, res) => {
             LEFT JOIN users_tbl U ON M.senderId = U.userId
             WHERE M.roomId = ?
         `;
-        
+
         const params = [roomId];
 
         if (before) {
@@ -329,7 +369,7 @@ router.post("/rooms/:roomId/messages/image", authMiddleware, upload.single('imag
         // 获取 io 实例
         const io = req.app.get('io');
         console.log('🔌 io 是否存在:', io ? 'YES ✅' : 'NO ❌');
-        
+
         if (io) {
             const roomName = `room_${roomId}`;
             console.log('📡 广播到房间:', roomName);
@@ -361,18 +401,18 @@ router.put("/rooms/:roomId/read", authMiddleware, async (req, res) => {
     // 验证参数
     if (!roomId || !userId) {
         console.error('❌ Missing parameters:', { roomId, userId });
-        return res.status(400).json({ 
+        return res.status(400).json({
             msg: "roomId와 userId가 필요합니다",
-            result: "error" 
+            result: "error"
         });
     }
 
     // 验证 roomId 是数字
     if (isNaN(parseInt(roomId))) {
         console.error('❌ Invalid roomId:', roomId);
-        return res.status(400).json({ 
+        return res.status(400).json({
             msg: "유효하지 않은 roomId입니다",
-            result: "error" 
+            result: "error"
         });
     }
 
@@ -384,9 +424,9 @@ router.put("/rooms/:roomId/read", authMiddleware, async (req, res) => {
         );
 
         if (membership.length === 0) {
-            return res.status(403).json({ 
+            return res.status(403).json({
                 msg: "채팅방 멤버가 아닙니다",
-                result: "error" 
+                result: "error"
             });
         }
 
@@ -402,10 +442,10 @@ router.put("/rooms/:roomId/read", authMiddleware, async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Failed to mark as read:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             msg: "읽음 상태 업데이트 실패",
             result: "error",
-            error: error.message 
+            error: error.message
         });
     }
 });

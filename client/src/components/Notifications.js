@@ -523,7 +523,7 @@ function Notifications() {
                             component="span" 
                             sx={{ color: '#96ACC1', fontWeight: 600, mr: 0.5 }}
                           >
-                            @{comment.replyToNickname}
+                            {/* @{comment.replyToNickname} */}
                           </Typography>
                         )}
                         {comment.content}

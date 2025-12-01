@@ -26,18 +26,18 @@ router.post('/upload', upload.array('file', 9), async (req, res) => {
     try {
         let results = [];
         let host = `${req.protocol}://${req.get("host")}/`;
-        
+
         for (let i = 0; i < files.length; i++) {
             let file = files[i];
             let filename = file.filename;
             let destination = file.destination;
             let isThumbnail = (i === 0);
-            
+
             let query = "INSERT INTO TBL_FEED_IMG (feedId, fileName, filePath, is_thumbnail, cdatetime, udatetime) VALUES(?, ?, ?, ?, NOW(), NOW())";
             let result = await db.query(query, [feedId, filename, host + destination + filename, isThumbnail]);
             results.push(result);
         }
-        
+
         res.json({ message: "success", result: results });
     } catch (err) {
         console.log(err);
@@ -141,7 +141,7 @@ router.get("/", async (req, res) => {
 router.get("/:userId", async (req, res) => {
     let { userId } = req.params;
     let { viewerId } = req.query; // 查看者ID，用于判断点赞收藏状态
-    
+
     try {
         let sql = `
             SELECT 
@@ -155,7 +155,7 @@ router.get("/:userId", async (req, res) => {
             WHERE F.userId = ?
             ORDER BY F.cdatetime DESC
         `;
-        
+
         let params = viewerId ? [viewerId, viewerId, userId] : [userId];
         let [list] = await db.query(sql, params);
 
@@ -380,6 +380,134 @@ router.get("/:feedId/comments", async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Failed to get comments", error: error.message });
+    }
+});
+
+// 获取单个Feed详情（用于编辑）
+router.get("/detail/:feedId", async (req, res) => {
+    let { feedId } = req.params;
+
+    try {
+        let sql = `
+            SELECT F.*, 
+                   I.imgId, I.fileName, I.filePath, I.is_thumbnail
+            FROM TBL_FEED F
+            LEFT JOIN TBL_FEED_IMG I ON F.feedId = I.feedId
+            WHERE F.feedId = ?
+        `;
+        let [rows] = await db.query(sql, [feedId]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Feed를 찾을 수 없습니다" });
+        }
+
+        let feed = {
+            feedId: rows[0].feedId,
+            userId: rows[0].userId,
+            feedType: rows[0].feedType,
+            title: rows[0].title,
+            content: rows[0].content,
+            isAnonymous: rows[0].isAnonymous,
+            groupId: rows[0].groupId,
+            routeId: rows[0].routeId,
+            historyId: rows[0].historyId,
+            location: rows[0].location,
+            images: []
+        };
+
+        // 如果这个 feed 关联了活动，获取同伴信息
+        if (feed.historyId) {
+            let [companions] = await db.query(`
+                SELECT DISTINCT U.userId, U.nickname, U.profileImg
+                FROM TBL_ACTIVITY_SEGMENT_RECORD R
+                LEFT JOIN users_tbl U ON R.userId = U.userId
+                WHERE R.activityId = ? AND R.userId != ?
+            `, [feed.historyId, feed.userId]);
+
+            feed.companions = companions;
+        }
+
+        rows.forEach(row => {
+            if (row.imgId) {
+                feed.images.push({
+                    imgId: row.imgId,
+                    fileName: row.fileName,
+                    filePath: row.filePath,
+                    isThumbnail: row.is_thumbnail
+                });
+            }
+        });
+
+        res.json({ result: "success", feed });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Failed to get feed detail", error: error.message });
+    }
+});
+
+// 修改Feed
+router.put("/:feedId", authMiddleware, async (req, res) => {
+    let { feedId } = req.params;
+    let { title, content } = req.body;
+
+    try {
+        let sql = "UPDATE TBL_FEED SET title = ?, content = ?, udatetime = NOW() WHERE feedId = ?";
+        await db.query(sql, [title || null, content, feedId]);
+
+        res.json({ result: "success", msg: "수정 완료" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Update failed", error: error.message });
+    }
+});
+
+// 删除Feed图片
+router.delete("/image/:imgId", authMiddleware, async (req, res) => {
+    let { imgId } = req.params;
+
+    try {
+        await db.query("DELETE FROM TBL_FEED_IMG WHERE imgId = ?", [imgId]);
+        res.json({ result: "success", msg: "이미지 삭제 완료" });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Image delete failed", error: error.message });
+    }
+});
+
+// 为已有Feed上传新图片
+router.post('/upload-additional/:feedId', upload.array('file', 9), async (req, res) => {
+    let { feedId } = req.params;
+    const files = req.files;
+
+    if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+    }
+
+    try {
+        // 检查现有图片数量
+        let [existing] = await db.query("SELECT COUNT(*) as count FROM TBL_FEED_IMG WHERE feedId = ?", [feedId]);
+        let currentCount = existing[0].count;
+
+        if (currentCount + files.length > 9) {
+            return res.status(400).json({ message: "최대 9개의 이미지까지만 가능합니다" });
+        }
+
+        let results = [];
+        let host = `${req.protocol}://${req.get("host")}/`;
+
+        for (let file of files) {
+            let filename = file.filename;
+            let destination = file.destination;
+
+            let query = "INSERT INTO TBL_FEED_IMG (feedId, fileName, filePath, is_thumbnail, cdatetime, udatetime) VALUES(?, ?, ?, FALSE, NOW(), NOW())";
+            let result = await db.query(query, [feedId, filename, host + destination + filename]);
+            results.push(result);
+        }
+
+        res.json({ message: "success", result: results });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Upload failed", error: err.message });
     }
 });
 

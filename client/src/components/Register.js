@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { PhotoCamera, Close, ArrowBack, Favorite, VisibilityOff } from '@mui/icons-material';
 import { jwtDecode } from "jwt-decode";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function Register() {
   const [files, setFile] = useState([]);
@@ -25,16 +25,24 @@ function Register() {
   const contentRef = useRef();
   const navigate = useNavigate();
 
+  const location = useLocation();
+  const activityData = location.state; // 从 ActivityHistory 传来的数据
+
   const MAX_IMAGES = 9;
 
   React.useEffect(() => {
     if (category === 'group') {
-      setCompanions(['김철수', '이영희', '박민수']);
+      // ⭐ 如果有活动数据，使用活动数据
+      if (activityData?.companions && activityData.companions.length > 0) {
+        setCompanions(activityData.companions); // 保持对象格式
+      } else {
+        setCompanions(['김철수', '이영희', '박민수']); // 默认字符串格式
+      }
     }
     if (category !== 'vent') {
       setIsAnonymous(false);
     }
-  }, [category]);
+  }, [category, activityData]);
 
   const handleFileChange = (event) => {
     const newFiles = Array.from(event.target.files);
@@ -66,17 +74,20 @@ function Register() {
 
     const token = localStorage.getItem("token");
     const decoded = jwtDecode(token);
+
+    // ⭐ 添加活动相关参数
     let param = {
       title: titleRef.current.value || null,
       content: contentRef.current.value,
       userId: decoded.userId,
       feedType: category,
       isAnonymous: isAnonymous,
-      groupId: null,
-      routeId: null,
-      historyId: null,
-      location: null
+      groupId: activityData?.groupId || null,
+      routeId: activityData?.routeId || null,
+      historyId: activityData?.historyId || null,
+      location: activityData?.location || null
     };
+
 
     fetch("http://localhost:3010/feed", {
       method: "POST",
@@ -231,19 +242,38 @@ function Register() {
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              {companions.map((name, index) => (
-                <Chip
-                  key={index}
-                  label={name}
-                  size="small"
-                  sx={{
-                    bgcolor: '#F0F7FA',
-                    color: '#96ACC1',
-                    fontWeight: 500,
-                    border: '1px solid #D6E8F0'
-                  }}
-                />
-              ))}
+              {companions.map((companion, index) => {
+                // ⭐ 支持字符串或对象两种格式
+                const name = typeof companion === 'string' ? companion : companion.nickname;
+                const userId = typeof companion === 'object' ? companion.userId : null;
+
+                return (
+                  <Chip
+                    key={index}
+                    avatar={
+                      companion.profileImg ? (
+                        <Avatar
+                          src={companion.profileImg}
+                          sx={{ width: 24, height: 24 }}
+                        >
+                          {name?.charAt(0).toUpperCase()}
+                        </Avatar>
+                      ) : undefined
+                    }
+                    label={name}
+                    size="small"
+                    onClick={userId ? () => navigate(`/profile/${userId}`) : undefined}
+                    sx={{
+                      bgcolor: '#F0F7FA',
+                      color: '#96ACC1',
+                      fontWeight: 500,
+                      border: '1px solid #D6E8F0',
+                      cursor: userId ? 'pointer' : 'default',
+                      '&:hover': userId ? { bgcolor: '#E3F2FD' } : {}
+                    }}
+                  />
+                );
+              })}
             </Box>
           </Paper>
         )}

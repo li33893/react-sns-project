@@ -32,7 +32,7 @@ CREATE TABLE `tbl_chat_room` (
   PRIMARY KEY (`roomId`),
   KEY `relatedGroupId` (`relatedGroupId`),
   CONSTRAINT `tbl_chat_room_ibfk_1` FOREIGN KEY (`relatedGroupId`) REFERENCES `tbl_group` (`groupId`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='聊天室表';
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='聊天室表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +41,7 @@ CREATE TABLE `tbl_chat_room` (
 
 LOCK TABLES `tbl_chat_room` WRITE;
 /*!40000 ALTER TABLE `tbl_chat_room` DISABLE KEYS */;
-INSERT INTO `tbl_chat_room` VALUES (1,'group','江南夜跑小队群聊',2,'2025-11-28 10:56:59','2025-11-28 10:56:59'),(2,'group','테스트 그룹채팅',3,'2025-11-28 11:43:14','2025-11-28 11:43:14'),(3,'group','test2 그룹채팅',4,'2025-11-28 15:47:32','2025-11-28 15:47:32');
+INSERT INTO `tbl_chat_room` VALUES (1,'group','江南夜跑小队群聊',2,'2025-11-28 10:56:59','2025-11-28 10:56:59'),(2,'group','테스트 그룹채팅',3,'2025-11-28 11:43:14','2025-11-28 11:43:14'),(3,'group','test2 그룹채팅',4,'2025-11-28 15:47:32','2025-11-28 15:47:32'),(4,'group','晨跑小队 그룹채팅',5,'2025-11-30 13:23:11','2025-11-30 13:23:11'),(5,'group','瑞草 그룹채팅',6,'2025-11-30 13:44:29','2025-11-30 13:44:29'),(6,'group','心累对 그룹채팅',7,'2025-11-30 16:28:50','2025-11-30 16:28:50'),(7,'group','我可真会给自己找麻烦 그룹채팅',8,'2025-11-30 16:39:06','2025-11-30 16:39:06');
 /*!40000 ALTER TABLE `tbl_chat_room` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-28 18:05:42
+-- Dump completed on 2025-11-30 20:52:52

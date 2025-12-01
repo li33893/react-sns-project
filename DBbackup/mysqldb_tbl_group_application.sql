@@ -45,7 +45,7 @@ CREATE TABLE `tbl_group_application` (
   CONSTRAINT `tbl_group_application_ibfk_2` FOREIGN KEY (`userId`) REFERENCES `users_tbl` (`userId`) ON DELETE CASCADE,
   CONSTRAINT `tbl_group_application_ibfk_3` FOREIGN KEY (`preferredSegmentId`) REFERENCES `tbl_route_segment` (`segmentId`) ON DELETE CASCADE,
   CONSTRAINT `tbl_group_application_ibfk_4` FOREIGN KEY (`reviewedBy`) REFERENCES `users_tbl` (`userId`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='入队申请表';
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='入队申请表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -54,7 +54,7 @@ CREATE TABLE `tbl_group_application` (
 
 LOCK TABLES `tbl_group_application` WRITE;
 /*!40000 ALTER TABLE `tbl_group_application` DISABLE KEYS */;
-INSERT INTO `tbl_group_application` VALUES (1,4,'elle456',10,'none',NULL,'none','pending',NULL,NULL,NULL,'2025-11-28 15:48:36','2025-11-28 15:48:36'),(2,4,'elle789',11,'none',NULL,'none','pending',NULL,NULL,NULL,'2025-11-28 15:49:23','2025-11-28 15:49:23');
+INSERT INTO `tbl_group_application` VALUES (1,4,'elle456',10,'none',NULL,'none','approved','elle123',NULL,'2025-11-30 12:07:42','2025-11-28 15:48:36','2025-11-30 12:07:42'),(2,4,'elle789',11,'none',NULL,'none','approved','elle123',NULL,'2025-11-30 12:07:36','2025-11-28 15:49:23','2025-11-30 12:07:36'),(3,3,'elle123456',8,'none','student','none','approved','elle123',NULL,'2025-11-30 12:10:26','2025-11-30 12:09:20','2025-11-30 12:10:26'),(4,5,'elle456',14,'none','none','///','pending',NULL,NULL,NULL,'2025-11-30 13:37:40','2025-11-30 13:37:40'),(5,7,'elle456',20,'none','student','none','approved','elle123',NULL,'2025-11-30 16:34:42','2025-11-30 16:31:01','2025-11-30 16:34:42'),(6,7,'elle789',21,'none','none','none','pending',NULL,NULL,NULL,'2025-11-30 16:36:27','2025-11-30 16:36:27'),(7,8,'elle789',24,'123','123','123','approved','elle123',NULL,'2025-11-30 18:35:33','2025-11-30 17:55:28','2025-11-30 18:35:33'),(8,8,'elle456',25,'n','n','n','approved','elle123',NULL,'2025-11-30 18:35:30','2025-11-30 18:34:59','2025-11-30 18:35:30');
 /*!40000 ALTER TABLE `tbl_group_application` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -67,4 +67,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-28 18:05:41
+-- Dump completed on 2025-11-30 20:52:53

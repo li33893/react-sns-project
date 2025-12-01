@@ -18,6 +18,8 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import SearchIcon from '@mui/icons-material/Search';
 import ReplyIcon from '@mui/icons-material/Reply';
+import PeopleIcon from '@mui/icons-material/People';
+
 
 function Feed() {
   const [feeds, setFeeds] = useState([]);
@@ -31,7 +33,7 @@ function Feed() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [replyToUser, setReplyToUser] = useState(null);
-  
+
   let navigate = useNavigate();
 
   useEffect(() => {
@@ -47,22 +49,22 @@ function Feed() {
 
   function fnFeeds() {
     if (!currentUserId) return;
-    
+
     let params = new URLSearchParams({
       feedType: category,
       userId: currentUserId
     });
-    
+
     if (filter !== 'team') {
       params.append('filter', filter);
     }
-    
+
     if (searchQuery.trim()) {
       params.append('search', searchQuery.trim());
     }
-    
+
     let url = `http://localhost:3010/feed?${params.toString()}`;
-    
+
     fetch(url)
       .then(res => res.json())
       .then(data => {
@@ -95,7 +97,25 @@ function Feed() {
   };
 
   const handleClickOpen = (feed) => {
-    setSelectedFeed(feed);
+    // ⭐ 如果这个 feed 有 historyId，先获取完整详情（包括同伴信息）
+    if (feed.historyId) {
+      fetch(`http://localhost:3010/feed/detail/${feed.feedId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.result === 'success') {
+            setSelectedFeed(data.feed);
+          } else {
+            setSelectedFeed(feed);
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          setSelectedFeed(feed);
+        });
+    } else {
+      setSelectedFeed(feed);
+    }
+
     setOpen(true);
     setCurrentImageIndex(0);
     fetchComments(feed.feedId);
@@ -113,14 +133,14 @@ function Feed() {
 
   const handlePrevImage = (e) => {
     e.stopPropagation();
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? selectedFeed.images.length - 1 : prev - 1
     );
   };
 
   const handleNextImage = (e) => {
     e.stopPropagation();
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === selectedFeed.images.length - 1 ? 0 : prev + 1
     );
   };
@@ -135,7 +155,7 @@ function Feed() {
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
-    
+
     fetch(`http://localhost:3010/feed/${selectedFeed.feedId}/comment`, {
       method: 'POST',
       headers: {
@@ -153,9 +173,9 @@ function Feed() {
         setNewComment('');
         setReplyToUser(null);
         fetchComments(selectedFeed.feedId);
-        setFeeds(feeds.map(f => 
-          f.feedId === selectedFeed.feedId 
-            ? {...f, commentCnt: f.commentCnt + 1}
+        setFeeds(feeds.map(f =>
+          f.feedId === selectedFeed.feedId
+            ? { ...f, commentCnt: f.commentCnt + 1 }
             : f
         ));
       })
@@ -167,7 +187,7 @@ function Feed() {
 
   const handleLike = (feedId, e) => {
     e.stopPropagation();
-    
+
     fetch(`http://localhost:3010/feed/${feedId}/like`, {
       method: 'POST',
       headers: {
@@ -196,7 +216,7 @@ function Feed() {
 
   const handleBookmark = (feedId, e) => {
     e.stopPropagation();
-    
+
     fetch(`http://localhost:3010/feed/${feedId}/favorite`, {
       method: 'POST',
       headers: {
@@ -230,8 +250,8 @@ function Feed() {
 
   return (
     <Box sx={{ bgcolor: '#E2E2E2', minHeight: '100vh', pb: 10 }}>
-      <Box 
-        sx={{ 
+      <Box
+        sx={{
           bgcolor: '#F0F0F0',
           padding: '16px 20px',
           position: 'sticky',
@@ -243,7 +263,7 @@ function Feed() {
         <Typography variant="h5" sx={{ fontWeight: 600, mb: 2, color: '#1A1A1A' }}>
           편하게 둘러봐 ~
         </Typography>
-        
+
         {/* 搜索框 */}
         <TextField
           placeholder="제목이나 내용으로 검색..."
@@ -270,7 +290,7 @@ function Feed() {
               </InputAdornment>
             )
           }}
-          sx={{ 
+          sx={{
             mb: 2,
             bgcolor: '#fff',
             borderRadius: '12px',
@@ -279,32 +299,32 @@ function Feed() {
             }
           }}
         />
-        
+
         <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-          <Chip 
-            label="운동구역" 
+          <Chip
+            label="운동구역"
             onClick={() => setCategory('group')}
-            sx={{ 
+            sx={{
               bgcolor: category === 'group' ? '#96ACC1' : '#fff',
               color: category === 'group' ? '#fff' : '#666',
               fontWeight: 500,
               '&:hover': { bgcolor: category === 'group' ? '#7A94A8' : '#f5f5f5' }
             }}
           />
-          <Chip 
-            label="일상구역" 
+          <Chip
+            label="일상구역"
             onClick={() => setCategory('daily')}
-            sx={{ 
+            sx={{
               bgcolor: category === 'daily' ? '#96ACC1' : '#fff',
               color: category === 'daily' ? '#fff' : '#666',
               fontWeight: 500,
               '&:hover': { bgcolor: category === 'daily' ? '#7A94A8' : '#f5f5f5' }
             }}
           />
-          <Chip 
-            label="발산구역" 
+          <Chip
+            label="발산구역"
             onClick={() => setCategory('vent')}
-            sx={{ 
+            sx={{
               bgcolor: category === 'vent' ? '#96ACC1' : '#fff',
               color: category === 'vent' ? '#fff' : '#666',
               fontWeight: 500,
@@ -314,12 +334,12 @@ function Feed() {
         </Box>
 
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Chip 
-            label="팀 동태" 
+          <Chip
+            label="팀 동태"
             onClick={() => setFilter('team')}
             size="small"
             disabled
-            sx={{ 
+            sx={{
               bgcolor: filter === 'team' ? '#96ACC1' : '#fff',
               color: filter === 'team' ? '#fff' : '#999',
               '&.Mui-disabled': {
@@ -328,21 +348,21 @@ function Feed() {
               }
             }}
           />
-          <Chip 
-            label="지역" 
+          <Chip
+            label="지역"
             onClick={() => setFilter('location')}
             size="small"
-            sx={{ 
+            sx={{
               bgcolor: filter === 'location' ? '#96ACC1' : '#fff',
               color: filter === 'location' ? '#fff' : '#666',
               '&:hover': { bgcolor: filter === 'location' ? '#7A94A8' : '#f5f5f5' }
             }}
           />
-          <Chip 
-            label="전체" 
+          <Chip
+            label="전체"
             onClick={() => setFilter('all')}
             size="small"
-            sx={{ 
+            sx={{
               bgcolor: filter === 'all' ? '#96ACC1' : '#fff',
               color: filter === 'all' ? '#fff' : '#666',
               '&:hover': { bgcolor: filter === 'all' ? '#7A94A8' : '#f5f5f5' }
@@ -356,8 +376,8 @@ function Feed() {
           <Grid container spacing={2.5}>
             {feeds.map((feed) => (
               <Grid item xs={6} sm={4} md={3} key={feed.feedId}>
-                <Card 
-                  sx={{ 
+                <Card
+                  sx={{
                     borderRadius: '16px',
                     overflow: 'hidden',
                     bgcolor: '#fff',
@@ -376,22 +396,22 @@ function Feed() {
                       component="img"
                       image={feed.thumbnail.filePath}
                       alt={feed.thumbnail.fileName}
-                      sx={{ 
+                      sx={{
                         aspectRatio: '1',
                         objectFit: 'cover',
                         height: 200
                       }}
                     />
                   )}
-                  
+
                   <CardContent sx={{ p: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Avatar 
+                      <Avatar
                         src={feed.isAnonymous ? null : feed.profileImg}
                         onClick={(e) => !feed.isAnonymous && handleAvatarClick(feed.userId, e)}
-                        sx={{ 
-                          width: 28, 
-                          height: 28, 
+                        sx={{
+                          width: 28,
+                          height: 28,
                           mr: 1,
                           bgcolor: '#333',
                           cursor: feed.isAnonymous ? 'default' : 'pointer'
@@ -403,9 +423,9 @@ function Feed() {
                           (feed.nickname || feed.userId)?.charAt(0).toUpperCase()
                         )}
                       </Avatar>
-                      <Typography 
-                        variant="caption" 
-                        sx={{ 
+                      <Typography
+                        variant="caption"
+                        sx={{
                           fontWeight: 600,
                           color: '#444',
                           cursor: feed.isAnonymous ? 'default' : 'pointer'
@@ -417,9 +437,9 @@ function Feed() {
                     </Box>
 
                     {feed.title && (
-                      <Typography 
-                        variant="subtitle2" 
-                        sx={{ 
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
                           fontWeight: 600,
                           color: '#333',
                           mb: 0.5,
@@ -432,9 +452,9 @@ function Feed() {
                       </Typography>
                     )}
 
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
+                    <Typography
+                      variant="body2"
+                      sx={{
                         color: '#666',
                         mb: 1.5,
                         display: '-webkit-box',
@@ -448,7 +468,7 @@ function Feed() {
                     </Typography>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <IconButton 
+                      <IconButton
                         size="small"
                         onClick={(e) => handleLike(feed.feedId, e)}
                         sx={{ color: feed.isLiked ? '#960303ff' : '#333' }}
@@ -458,8 +478,8 @@ function Feed() {
                       <Typography variant="caption" sx={{ color: '#666', mr: 1 }}>
                         {feed.likeCnt || 0}
                       </Typography>
-                      
-                      <IconButton 
+
+                      <IconButton
                         size="small"
                         sx={{ color: '#333' }}
                       >
@@ -468,8 +488,8 @@ function Feed() {
                       <Typography variant="caption" sx={{ color: '#666' }}>
                         {feed.commentCnt || 0}
                       </Typography>
-                      
-                      <IconButton 
+
+                      <IconButton
                         size="small"
                         onClick={(e) => handleBookmark(feed.feedId, e)}
                         sx={{ color: feed.isFavorited ? '#FFB800' : '#333', ml: 'auto' }}
@@ -495,7 +515,7 @@ function Feed() {
         sx={{
           position: 'fixed',
           bottom: { xs: 20, sm: 24 },
-          left: { 
+          left: {
             xs: '50%',
             sm: '50%',
             md: 'calc(240px + (100% - 240px) / 2)'
@@ -520,10 +540,10 @@ function Feed() {
       </Fab>
 
       {/* 详情弹窗 */}
-      <Dialog 
-        open={open} 
-        onClose={handleClose} 
-        fullWidth 
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        fullWidth
         maxWidth="md"
         PaperProps={{
           sx: { borderRadius: '20px' }
@@ -551,13 +571,13 @@ function Feed() {
                   key={currentImageIndex}
                   src={selectedFeed.images[currentImageIndex].filePath}
                   alt={selectedFeed.images[currentImageIndex].fileName}
-                  style={{ 
-                    width: '100%', 
-                    height: '100%', 
+                  style={{
+                    width: '100%',
+                    height: '100%',
                     objectFit: 'contain'
                   }}
                 />
-                
+
                 {selectedFeed.images.length > 1 && (
                   <>
                     <IconButton
@@ -613,11 +633,11 @@ function Feed() {
 
           <Box sx={{ width: { xs: '100%', md: '400px' }, p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Avatar 
+              <Avatar
                 src={selectedFeed?.isAnonymous ? null : selectedFeed?.profileImg}
                 onClick={(e) => !selectedFeed?.isAnonymous && handleAvatarClick(selectedFeed?.userId, e)}
-                sx={{ 
-                  bgcolor: '#96ACC1', 
+                sx={{
+                  bgcolor: '#96ACC1',
                   mr: 2,
                   cursor: selectedFeed?.isAnonymous ? 'default' : 'pointer'
                 }}
@@ -628,9 +648,9 @@ function Feed() {
                   (selectedFeed?.nickname || selectedFeed?.userId)?.charAt(0).toUpperCase()
                 )}
               </Avatar>
-              <Typography 
-                variant="subtitle1" 
-                sx={{ 
+              <Typography
+                variant="subtitle1"
+                sx={{
                   fontWeight: 600,
                   cursor: selectedFeed?.isAnonymous ? 'default' : 'pointer'
                 }}
@@ -650,6 +670,41 @@ function Feed() {
               {selectedFeed?.content}
             </Typography>
 
+            {/* ⭐ 显示同伴列表 */}
+            {selectedFeed?.companions && selectedFeed.companions.length > 0 && (
+              <Box sx={{ mb: 3, p: 2, bgcolor: '#F5F8FA', borderRadius: '12px' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <PeopleIcon sx={{ fontSize: 18, color: '#96ACC1', mr: 0.5 }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#96ACC1' }}>
+                    함께 달린 사람
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                  {selectedFeed.companions.map((companion) => (
+                    <Chip
+                      key={companion.userId}
+                      avatar={
+                        <Avatar
+                          src={companion.profileImg}
+                          sx={{ width: 24, height: 24 }}
+                        >
+                          {companion.nickname?.charAt(0).toUpperCase()}
+                        </Avatar>
+                      }
+                      label={companion.nickname}
+                      size="small"
+                      onClick={() => navigate(`/profile/${companion.userId}`)}
+                      sx={{
+                        bgcolor: '#fff',
+                        cursor: 'pointer',
+                        '&:hover': { bgcolor: '#E3F2FD' }
+                      }}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            )}
+
             <Box sx={{ display: 'flex', gap: 2, mb: 3, pb: 2, borderBottom: '1px solid #eee' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <FavoriteIcon sx={{ fontSize: 18, color: '#FF6B6B' }} />
@@ -668,26 +723,26 @@ function Feed() {
               {comments.map((comment) => (
                 <ListItem key={comment.commentId} alignItems="flex-start" sx={{ px: 0 }}>
                   <ListItemAvatar>
-                    <Avatar 
+                    <Avatar
                       src={comment.profileImg}
                       onClick={(e) => handleAvatarClick(comment.userId, e)}
                       sx={{ width: 32, height: 32, bgcolor: '#96ACC1', cursor: 'pointer' }}
                     >
-                      {(comment.nickname || comment.userId)?.charAt(0).toUpperCase()}
+                      {/* {(comment.nickname || comment.userId)?.charAt(0).toUpperCase()} */}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography 
-                          variant="caption" 
+                        <Typography
+                          variant="caption"
                           sx={{ fontWeight: 600, cursor: 'pointer' }}
                           onClick={(e) => handleAvatarClick(comment.userId, e)}
                         >
                           {comment.nickname || comment.userId}
                         </Typography>
-                        <IconButton 
-                          size="small" 
+                        <IconButton
+                          size="small"
                           onClick={() => handleReply(comment)}
                           sx={{ ml: 'auto' }}
                         >
@@ -698,11 +753,11 @@ function Feed() {
                     secondary={
                       <Typography variant="body2" sx={{ color: '#666' }}>
                         {comment.replyToNickname && (
-                          <Typography 
-                            component="span" 
+                          <Typography
+                            component="span"
                             sx={{ color: '#96ACC1', fontWeight: 600, mr: 0.5 }}
                           >
-                            
+
                           </Typography>
                         )}
                         {comment.content}
@@ -738,7 +793,7 @@ function Feed() {
                     handleAddComment();
                   }
                 }}
-                sx={{ 
+                sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '12px'
                   }

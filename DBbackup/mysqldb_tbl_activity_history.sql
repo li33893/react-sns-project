@@ -41,7 +41,7 @@ CREATE TABLE `tbl_activity_history` (
   KEY `routeId` (`routeId`),
   CONSTRAINT `tbl_activity_history_ibfk_1` FOREIGN KEY (`groupId`) REFERENCES `tbl_group` (`groupId`) ON DELETE CASCADE,
   CONSTRAINT `tbl_activity_history_ibfk_2` FOREIGN KEY (`routeId`) REFERENCES `tbl_route` (`routeId`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='活动历史表-每次跑步活动的整体记录';
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='活动历史表-每次跑步活动的整体记录';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -50,6 +50,7 @@ CREATE TABLE `tbl_activity_history` (
 
 LOCK TABLES `tbl_activity_history` WRITE;
 /*!40000 ALTER TABLE `tbl_activity_history` DISABLE KEYS */;
+INSERT INTO `tbl_activity_history` VALUES (1,8,9,'2025-11-30','16:38:00','2025-11-30 18:35:53','2025-11-30 18:36:34','completed',3,0,NULL,'2025-11-30 18:35:53','2025-11-30 18:36:34'),(2,8,9,'2025-11-30','16:38:00','2025-11-30 18:47:37','2025-11-30 18:48:11','completed',3,0,NULL,'2025-11-30 18:47:37','2025-11-30 18:48:11'),(3,8,9,'2025-11-30','16:38:00','2025-11-30 18:50:20',NULL,'cancelled',3,0,NULL,'2025-11-30 18:50:20','2025-11-30 18:50:28'),(4,8,9,'2025-11-30','16:38:00','2025-11-30 18:50:32','2025-11-30 19:35:20','completed',3,0,NULL,'2025-11-30 18:50:32','2025-11-30 19:35:20'),(5,8,9,'2025-11-30','16:38:00','2025-11-30 19:35:26','2025-11-30 19:37:24','completed',3,0,NULL,'2025-11-30 19:35:26','2025-11-30 19:37:24'),(6,8,9,'2025-11-30','16:38:00','2025-11-30 19:37:32','2025-11-30 19:44:51','completed',3,0,NULL,'2025-11-30 19:37:32','2025-11-30 19:44:51'),(7,8,9,'2025-11-30','16:38:00','2025-11-30 19:45:01','2025-11-30 19:59:47','completed',3,0,NULL,'2025-11-30 19:45:01','2025-11-30 19:59:47'),(8,8,9,'2025-11-30','16:38:00','2025-11-30 20:04:08','2025-11-30 20:07:24','completed',3,0,NULL,'2025-11-30 20:04:08','2025-11-30 20:07:24');
 /*!40000 ALTER TABLE `tbl_activity_history` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -62,4 +63,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-28 18:05:41
+-- Dump completed on 2025-11-30 20:52:52

@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  Typography, 
-  Toolbar, 
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+  Toolbar,
   ListItemIcon,
   Box,
   Badge,
+  ListItemButton,
   Avatar,
   Divider,
   Button
 } from '@mui/material';
-import { 
-  Home, 
-  Add, 
-  AccountCircle, 
+import {
+  Home,
+  Add,
+  AccountCircle,
   Notifications,
   Message,
   Group,
@@ -24,6 +25,7 @@ import {
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'; // ⭐ 添加这行
 
 function Menu() {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -77,10 +79,10 @@ function Menu() {
   const handleLogout = () => {
     // 清除本地存储的 token
     localStorage.removeItem("token");
-    
+
     // 显示提示消息
     alert("로그아웃되었습니다");
-    
+
     // 跳转到登录页
     navigate("/");
   };
@@ -101,18 +103,19 @@ function Menu() {
       }}
     >
       <Toolbar />
-      
+
       {/* Logo/Title */}
-      <Box sx={{ p: 2, textAlign: 'center' }}>
-        <Typography 
-          variant="h5" 
-          sx={{ 
+      <Box sx={{  bgcolor:'#96ACC1', p: 2, textAlign: 'center' }}>
+        <Typography
+          variant="h5"
+          sx={{
             fontWeight: 700,
-            color: '#333',
+            color: '#F5F5F5',
+
             letterSpacing: '-0.5px'
           }}
         >
-          整个平台的标识
+          Sweatin'SkyBlue
         </Typography>
       </Box>
 
@@ -120,9 +123,9 @@ function Menu() {
 
       {/* Menu Items */}
       <List sx={{ px: 1 }}>
-        <ListItem 
-          button 
-          component={Link} 
+        <ListItem
+          button
+          component={Link}
           to="/feed"
           sx={{
             borderRadius: '12px',
@@ -135,8 +138,8 @@ function Menu() {
           <ListItemIcon sx={{ minWidth: 40 }}>
             <Home sx={{ color: '#333' }} />
           </ListItemIcon>
-          <ListItemText 
-            primary="홈" 
+          <ListItemText
+            primary="홈"
             primaryTypographyProps={{
               fontWeight: 500,
               color: '#333'
@@ -144,11 +147,11 @@ function Menu() {
           />
         </ListItem>
 
-        
 
-        <ListItem 
-          button 
-          component={Link} 
+
+        <ListItem
+          button
+          component={Link}
           to="/notifications"
           sx={{
             borderRadius: '12px',
@@ -159,8 +162,8 @@ function Menu() {
           }}
         >
           <ListItemIcon sx={{ minWidth: 40 }}>
-            <Badge 
-              badgeContent={unreadCount} 
+            <Badge
+              badgeContent={unreadCount}
               color="error"
               sx={{
                 '& .MuiBadge-badge': {
@@ -173,8 +176,8 @@ function Menu() {
               <Notifications sx={{ color: '#333' }} />
             </Badge>
           </ListItemIcon>
-          <ListItemText 
-            primary="알림" 
+          <ListItemText
+            primary="알림"
             primaryTypographyProps={{
               fontWeight: 500,
               color: '#333'
@@ -182,9 +185,9 @@ function Menu() {
           />
         </ListItem>
 
-        <ListItem 
-          button 
-          component={Link} 
+        <ListItem
+          button
+          component={Link}
           to="/messages"
           sx={{
             borderRadius: '12px',
@@ -197,8 +200,8 @@ function Menu() {
           <ListItemIcon sx={{ minWidth: 40 }}>
             <Message sx={{ color: '#333' }} />
           </ListItemIcon>
-          <ListItemText 
-            primary="메시지" 
+          <ListItemText
+            primary="메시지"
             primaryTypographyProps={{
               fontWeight: 500,
               color: '#333'
@@ -206,9 +209,9 @@ function Menu() {
           />
         </ListItem>
 
-        <ListItem 
-          button 
-          component={Link} 
+        <ListItem
+          button
+          component={Link}
           to="/group"
           sx={{
             borderRadius: '12px',
@@ -221,8 +224,8 @@ function Menu() {
           <ListItemIcon sx={{ minWidth: 40 }}>
             <Group sx={{ color: '#333' }} />
           </ListItemIcon>
-          <ListItemText 
-            primary="팀" 
+          <ListItemText
+            primary="팀"
             primaryTypographyProps={{
               fontWeight: 500,
               color: '#333'
@@ -231,9 +234,9 @@ function Menu() {
         </ListItem>
 
 
-        <ListItem 
-          button 
-          component={Link} 
+        <ListItem
+          button
+          component={Link}
           to="/group/create"
           sx={{
             borderRadius: '12px',
@@ -246,8 +249,8 @@ function Menu() {
           <ListItemIcon sx={{ minWidth: 40 }}>
             <Add sx={{ color: '#333' }} />
           </ListItemIcon>
-          <ListItemText 
-            primary="팀 생성하러 가기" 
+          <ListItemText
+            primary="팀 생성하러 가기"
             primaryTypographyProps={{
               fontWeight: 500,
               color: '#333'
@@ -255,9 +258,16 @@ function Menu() {
           />
         </ListItem>
 
-        <ListItem 
-          button 
-          component={Link} 
+        <ListItemButton onClick={() => navigate('/activity-history')}>
+          <ListItemIcon>
+            <EmojiEventsIcon sx={{ color: '#333' }} />
+          </ListItemIcon>
+          <ListItemText primary="활동 내역" />
+        </ListItemButton>
+
+        <ListItem
+          button
+          component={Link}
           to="/mypage"
           sx={{
             borderRadius: '12px',
@@ -270,8 +280,8 @@ function Menu() {
           <ListItemIcon sx={{ minWidth: 40 }}>
             <AccountCircle sx={{ color: '#333' }} />
           </ListItemIcon>
-          <ListItemText 
-            primary="마이페이지" 
+          <ListItemText
+            primary="마이페이지"
             primaryTypographyProps={{
               fontWeight: 500,
               color: '#333'
@@ -280,14 +290,15 @@ function Menu() {
         </ListItem>
       </List>
 
+
       {/* User Profile at Bottom with Logout */}
       <Box sx={{ mt: 'auto', p: 2, bgcolor: '#1b1b1bff' }}>
         {currentUser && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-            <Avatar 
+            <Avatar
               src={currentUser.profileImg}
-              sx={{ 
-                width: 40, 
+              sx={{
+                width: 40,
                 height: 40,
                 bgcolor: '#555'
               }}
@@ -295,9 +306,9 @@ function Menu() {
               {currentUser.nickname?.charAt(0).toUpperCase() || currentUser.nickName?.charAt(0).toUpperCase() || 'U'}
             </Avatar>
             <Box sx={{ flex: 1, overflow: 'hidden' }}>
-              <Typography 
-                variant="body2" 
-                sx={{ 
+              <Typography
+                variant="body2"
+                sx={{
                   fontWeight: 600,
                   color: '#fff',
                   overflow: 'hidden',
@@ -307,9 +318,9 @@ function Menu() {
               >
                 {currentUser.nickname || currentUser.nickName || '사용자'}
               </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{ 
+              <Typography
+                variant="caption"
+                sx={{
                   color: '#bbb',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -322,7 +333,7 @@ function Menu() {
             </Box>
           </Box>
         )}
-        
+
         {/* ⭐ Logout Button */}
         <Button
           fullWidth

@@ -41,7 +41,7 @@ CREATE TABLE `tbl_group_member` (
   CONSTRAINT `tbl_group_member_ibfk_1` FOREIGN KEY (`groupId`) REFERENCES `tbl_group` (`groupId`) ON DELETE CASCADE,
   CONSTRAINT `tbl_group_member_ibfk_2` FOREIGN KEY (`userId`) REFERENCES `users_tbl` (`userId`) ON DELETE CASCADE,
   CONSTRAINT `tbl_group_member_ibfk_3` FOREIGN KEY (`assignedSegmentId`) REFERENCES `tbl_route_segment` (`segmentId`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='队伍成员表-记录谁在哪个队伍负责哪一段';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='队伍成员表-记录谁在哪个队伍负责哪一段';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -50,7 +50,7 @@ CREATE TABLE `tbl_group_member` (
 
 LOCK TABLES `tbl_group_member` WRITE;
 /*!40000 ALTER TABLE `tbl_group_member` DISABLE KEYS */;
-INSERT INTO `tbl_group_member` VALUES (1,2,'elle123','leader',1,'2025-11-28 10:56:59',0.00,0,0,'2025-11-28 10:56:59','2025-11-28 10:56:59'),(2,3,'elle123','leader',7,'2025-11-28 11:43:14',0.00,0,0,'2025-11-28 11:43:14','2025-11-28 11:43:14'),(3,4,'elle123','leader',9,'2025-11-28 15:47:32',0.00,0,0,'2025-11-28 15:47:32','2025-11-28 15:47:32'),(4,4,'elle789','member',11,'2025-11-30 12:07:36',0.00,0,0,'2025-11-30 12:07:36','2025-11-30 12:07:36'),(5,4,'elle456','member',10,'2025-11-30 12:07:42',0.00,0,0,'2025-11-30 12:07:42','2025-11-30 12:07:42'),(6,3,'elle123456','member',8,'2025-11-30 12:10:26',0.00,0,0,'2025-11-30 12:10:26','2025-11-30 12:10:26'),(7,5,'elle123','leader',12,'2025-11-30 13:23:11',0.00,0,0,'2025-11-30 13:23:11','2025-11-30 13:23:11'),(8,6,'elle123','leader',16,'2025-11-30 13:44:29',0.00,0,0,'2025-11-30 13:44:29','2025-11-30 13:44:29'),(9,7,'elle123','leader',19,'2025-11-30 16:28:50',0.00,0,0,'2025-11-30 16:28:50','2025-11-30 16:28:50'),(10,7,'elle456','member',20,'2025-11-30 16:34:42',0.00,0,0,'2025-11-30 16:34:42','2025-11-30 16:34:42'),(11,8,'elle123','leader',23,'2025-11-30 16:39:06',57.14,6,4,'2025-11-30 16:39:06','2025-11-30 20:07:24'),(12,8,'elle456','member',25,'2025-11-30 18:35:30',57.14,6,3,'2025-11-30 18:35:30','2025-11-30 20:07:24'),(13,8,'elle789','member',24,'2025-11-30 18:35:33',71.43,6,4,'2025-11-30 18:35:33','2025-11-30 20:07:24');
+INSERT INTO `tbl_group_member` VALUES (1,2,'elle123','leader',1,'2025-11-28 10:56:59',0.00,0,0,'2025-11-28 10:56:59','2025-11-28 10:56:59'),(2,3,'elle123','leader',7,'2025-11-28 11:43:14',0.00,0,0,'2025-11-28 11:43:14','2025-11-28 11:43:14'),(3,4,'elle123','leader',9,'2025-11-28 15:47:32',0.00,0,0,'2025-11-28 15:47:32','2025-11-28 15:47:32');
 /*!40000 ALTER TABLE `tbl_group_member` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -63,4 +63,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-30 20:52:53
+-- Dump completed on 2025-11-28 18:05:42

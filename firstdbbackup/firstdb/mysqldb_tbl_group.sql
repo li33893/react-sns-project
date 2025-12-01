@@ -42,7 +42,7 @@ CREATE TABLE `tbl_group` (
   KEY `leaderId` (`leaderId`),
   CONSTRAINT `tbl_group_ibfk_1` FOREIGN KEY (`routeId`) REFERENCES `tbl_route` (`routeId`) ON DELETE CASCADE,
   CONSTRAINT `tbl_group_ibfk_2` FOREIGN KEY (`leaderId`) REFERENCES `users_tbl` (`userId`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='跑步队伍表';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='跑步队伍表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -51,7 +51,7 @@ CREATE TABLE `tbl_group` (
 
 LOCK TABLES `tbl_group` WRITE;
 /*!40000 ALTER TABLE `tbl_group` DISABLE KEYS */;
-INSERT INTO `tbl_group` VALUES (2,'江南夜跑小队',3,'elle123','강남구','weekly','[\"1\", \"3\", \"5\"]','19:00:00',3,1,'recruiting',NULL,'2025-11-28 10:56:59','2025-11-28 10:56:59'),(3,'테스트',4,'elle123','서초구','weekly','[\"1\", \"3\", \"5\"]','15:50:00',2,2,'full','테스트','2025-11-28 11:43:14','2025-11-30 12:10:26'),(4,'test2',5,'elle123','서초구','weekly','[\"0\", \"1\", \"2\", \"3\", \"4\", \"5\", \"6\"]','15:50:00',3,3,'full',NULL,'2025-11-28 15:47:32','2025-11-30 12:07:42'),(5,'晨跑小队',6,'elle123','서초구','weekly','[\"1\", \"3\", \"5\"]','04:00:00',4,1,'recruiting',NULL,'2025-11-30 13:23:11','2025-11-30 13:23:11'),(6,'瑞草',7,'elle123','서초구','weekly','[\"0\", \"3\", \"5\"]','04:00:00',3,1,'recruiting',NULL,'2025-11-30 13:44:29','2025-11-30 13:44:29'),(7,'心累对',8,'elle123','서초구','weekly','[\"1\", \"3\", \"5\"]','16:28:00',3,2,'recruiting',NULL,'2025-11-30 16:28:50','2025-11-30 16:34:42'),(8,'我可真会给自己找麻烦',9,'elle123','서초구','weekly','[\"1\", \"3\", \"6\"]','16:38:00',3,3,'full',NULL,'2025-11-30 16:39:06','2025-11-30 18:35:33');
+INSERT INTO `tbl_group` VALUES (2,'江南夜跑小队',3,'elle123','강남구','weekly','[\"1\", \"3\", \"5\"]','19:00:00',3,1,'recruiting',NULL,'2025-11-28 10:56:59','2025-11-28 10:56:59'),(3,'테스트',4,'elle123','서초구','weekly','[\"1\", \"3\", \"5\"]','15:50:00',2,1,'recruiting','테스트','2025-11-28 11:43:14','2025-11-28 11:43:14'),(4,'test2',5,'elle123','서초구','weekly','[\"0\", \"1\", \"2\", \"3\", \"4\", \"5\", \"6\"]','15:50:00',3,1,'recruiting',NULL,'2025-11-28 15:47:32','2025-11-28 15:47:32');
 /*!40000 ALTER TABLE `tbl_group` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -64,4 +64,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-30 20:52:54
+-- Dump completed on 2025-11-28 18:05:41

@@ -32,7 +32,7 @@ CREATE TABLE `tbl_follow` (
   KEY `following_no` (`following_no`),
   CONSTRAINT `tbl_follow_ibfk_1` FOREIGN KEY (`follower_no`) REFERENCES `users_tbl` (`userId`) ON DELETE CASCADE,
   CONSTRAINT `tbl_follow_ibfk_2` FOREIGN KEY (`following_no`) REFERENCES `users_tbl` (`userId`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +41,7 @@ CREATE TABLE `tbl_follow` (
 
 LOCK TABLES `tbl_follow` WRITE;
 /*!40000 ALTER TABLE `tbl_follow` DISABLE KEYS */;
-INSERT INTO `tbl_follow` VALUES (2,'elle456','elle123','2025-11-27 16:41:44'),(3,'elle123','elle456','2025-11-27 17:00:49'),(4,'elle789','elle456','2025-11-27 17:10:26'),(5,'elle789','elle123','2025-11-27 17:10:45'),(6,'elle123456','elle123','2025-11-27 17:31:53'),(7,'elle123','elle123456','2025-11-27 17:35:20'),(8,'elle456','elle123456','2025-11-27 17:39:36'),(9,'elle123456','elle456','2025-11-27 17:45:35');
+INSERT INTO `tbl_follow` VALUES (1,'elle456','elle123','2025-11-27 20:32:16'),(2,'elle123','elle456','2025-11-27 20:32:55');
 /*!40000 ALTER TABLE `tbl_follow` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-28 18:05:42
+-- Dump completed on 2025-11-30 20:52:53

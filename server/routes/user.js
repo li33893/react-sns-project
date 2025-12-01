@@ -346,7 +346,7 @@ router.post("/join", async (req, res) => {
         const hashedPwd = await bcrypt.hash(pwd, 10);
         let sql = `INSERT INTO users_tbl 
                    (userId, email, pwd, nickName, addr, comorbidity, profileImg, completionRate, cdatetime, udatetime) 
-                   VALUES (?, ?, ?, ?, ?, ?, ?, 0.00, NOW(), NOW())`;
+                   VALUES (?, ?, ?, ?, ?, ?, ?, 100.00, NOW(), NOW())`;
 
         await db.query(sql, [userId, email, hashedPwd, nickName, address, comorbidity, avatarUrl || null]);
         res.json({ result: "success", msg: "회원가입 성공!" });

@@ -43,7 +43,7 @@ CREATE TABLE `tbl_route` (
   PRIMARY KEY (`routeId`),
   KEY `createdBy` (`createdBy`),
   CONSTRAINT `tbl_route_ibfk_1` FOREIGN KEY (`createdBy`) REFERENCES `users_tbl` (`userId`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='跑步路线表';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='跑步路线表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,7 +52,7 @@ CREATE TABLE `tbl_route` (
 
 LOCK TABLES `tbl_route` WRITE;
 /*!40000 ALTER TABLE `tbl_route` DISABLE KEYS */;
-INSERT INTO `tbl_route` VALUES (2,'江南夜跑路线','강남구','논현역 3号出口','강남역 2号出口',NULL,NULL,4.50,NULL,30,3,'intermediate','6分40秒/公里',NULL,'elle123','2025-11-28 10:56:43','2025-11-28 10:56:43'),(3,'江南夜跑路线','강남구','논현역 3号出口','강남역 2号出口',NULL,NULL,4.50,NULL,30,3,'intermediate','6分40秒/公里',NULL,'elle123','2025-11-28 10:56:59','2025-11-28 10:56:59'),(4,'테스트 경로','서초구','논현역','강남역',NULL,NULL,10.00,NULL,35,2,'intermediate','6분30초','테스트 설명','elle123','2025-11-28 11:43:14','2025-11-28 11:43:14'),(5,'test2','서초구','1','5',NULL,NULL,10.00,NULL,4,3,'intermediate','1분/km',NULL,'elle123','2025-11-28 15:47:32','2025-11-28 15:47:32'),(6,'富平晨跑小队','서초구','1','5',NULL,NULL,4.00,NULL,4,4,'intermediate','1min/km',NULL,'elle123','2025-11-30 13:23:11','2025-11-30 13:23:11'),(7,'瑞草','서초구','1','4',NULL,NULL,1.00,NULL,1,3,'intermediate','1',NULL,'elle123','2025-11-30 13:44:29','2025-11-30 13:44:29'),(8,'心累','서초구','1','5',NULL,NULL,4.00,NULL,4,4,'intermediate','1/1km',NULL,'elle123','2025-11-30 16:28:50','2025-11-30 16:28:50'),(9,'这回总该行了吧孩子要哭了','서초구','1','5',NULL,NULL,4.00,NULL,4,4,'intermediate','1/km',NULL,'elle123','2025-11-30 16:39:06','2025-11-30 16:39:06');
+INSERT INTO `tbl_route` VALUES (2,'江南夜跑路线','강남구','논현역 3号出口','강남역 2号出口',NULL,NULL,4.50,NULL,30,3,'intermediate','6分40秒/公里',NULL,'elle123','2025-11-28 10:56:43','2025-11-28 10:56:43'),(3,'江南夜跑路线','강남구','논현역 3号出口','강남역 2号出口',NULL,NULL,4.50,NULL,30,3,'intermediate','6分40秒/公里',NULL,'elle123','2025-11-28 10:56:59','2025-11-28 10:56:59'),(4,'테스트 경로','서초구','논현역','강남역',NULL,NULL,10.00,NULL,35,2,'intermediate','6분30초','테스트 설명','elle123','2025-11-28 11:43:14','2025-11-28 11:43:14'),(5,'test2','서초구','1','5',NULL,NULL,10.00,NULL,4,3,'intermediate','1분/km',NULL,'elle123','2025-11-28 15:47:32','2025-11-28 15:47:32');
 /*!40000 ALTER TABLE `tbl_route` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -65,4 +65,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-30 20:52:53
+-- Dump completed on 2025-11-28 18:05:42

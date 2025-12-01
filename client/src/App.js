@@ -18,6 +18,11 @@ import GroupApplications from './components/GroupApplications';
 
 import Messages from './components/Messages';
 import ChatRoom from './components/ChatRoom';
+import ActivityHistory from './components/ActivityHistory';
+import FeedEdit from './components/FeedEdit';
+import JoinedGroups from './components/JoinedGroups'; 
+
+
 
 
 
@@ -49,6 +54,9 @@ function App() {
           <Route path="/group/:groupId/applications" element={<GroupApplications />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/messages/:roomId" element={<ChatRoom />} />
+          <Route path="/activity-history" element={<ActivityHistory />} />
+          <Route path="/feed/edit/:feedId" element={<FeedEdit />} />
+          <Route path="/my/joined-groups" element={<JoinedGroups />} />
         </Routes>
       </Box>
     </Box>

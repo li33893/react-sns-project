@@ -3,7 +3,7 @@ import {
   Typography, Box, Avatar, Grid, IconButton, Tabs, Tab, Card,
   CardMedia, CardContent, Dialog, DialogTitle, DialogContent,
   DialogActions, TextField, Button, Menu, MenuItem, List, ListItem,
-  ListItemAvatar, ListItemText, Divider, Chip
+  ListItemAvatar, ListItemText, Divider, Chip, ListItemButton  // ⭐ 添加这个
 } from '@mui/material';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate, useParams } from 'react-router-dom';
@@ -19,6 +19,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MessageIcon from '@mui/icons-material/Message';
+import PeopleIcon from '@mui/icons-material/People';
 
 function MyPage() {
   const { userId: profileUserId } = useParams();
@@ -49,6 +50,7 @@ function MyPage() {
   const [following, setFollowing] = useState([]);
   const [comments, setComments] = useState([]);
   const [myGroups, setMyGroups] = useState([]);
+  const [joinedGroups, setJoinedGroups] = useState([]); // ⭐ 新增
   const [creatingChat, setCreatingChat] = useState(false);
 
   const navigate = useNavigate();
@@ -120,6 +122,8 @@ function MyPage() {
         fetchFavoriteFeeds();
       } else if (tabValue === 2) {
         fetchMyGroups();
+      } else if (tabValue === 3) {  // ⭐ 新增
+        fetchJoinedGroups();
       }
     }
   }, [tabValue, currentUserId, profileUserId]);
@@ -187,6 +191,11 @@ function MyPage() {
       });
   };
 
+  const handleEditClick = () => {
+    navigate(`/feed/edit/${menuFeedId}`);
+    handleMenuClose();
+  };
+
   const handleFollow = () => {
     const targetUserId = profileUserId || currentUserId;
     fetch(`http://localhost:3010/user/${targetUserId}/follow`, {
@@ -211,11 +220,11 @@ function MyPage() {
   // 创建私聊并跳转
   const handleSendMessage = async () => {
     if (creatingChat) return;
-    
+
     setCreatingChat(true);
     try {
       const targetUserId = profileUserId || currentUserId;
-      
+
       const res = await fetch('http://localhost:3010/message/rooms/private', {
         method: 'POST',
         headers: {
@@ -229,7 +238,7 @@ function MyPage() {
       });
 
       const data = await res.json();
-      
+
       if (data.result === 'success') {
         navigate(`/messages/${data.roomId}`);
       } else {
@@ -256,11 +265,37 @@ function MyPage() {
       .catch(err => console.error(err));
   };
 
+  const fetchJoinedGroups = () => {
+    const targetUserId = profileUserId || currentUserId;
+    fetch(`http://localhost:3010/group/user/${targetUserId}/joined-groups`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.result === 'success') {
+          setJoinedGroups(data.groups);
+        }
+      })
+      .catch(err => console.error(err));
+  };
+
   const handleFeedClick = (feed) => {
-    setSelectedFeed(feed);
+    // 如果需要同伴信息，先获取完整详情
+    if (feed.historyId) {
+      fetch(`http://localhost:3010/feed/detail/${feed.feedId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.result === 'success') {
+            setSelectedFeed(data.feed);
+            fetchComments(data.feed.feedId);
+          }
+        })
+        .catch(err => console.error(err));
+    } else {
+      setSelectedFeed(feed);
+      fetchComments(feed.feedId);
+    }
+
     setFeedDialogOpen(true);
     setCurrentImageIndex(0);
-    fetchComments(feed.feedId);
   };
 
   const handleFeedDialogClose = () => {
@@ -550,10 +585,13 @@ function MyPage() {
           <Tab label={isOwnProfile ? "내 피드" : "피드"} />
           <Tab label="저장한 피드" />
           <Tab label={isOwnProfile ? "내 팀" : "팀"} />
+          {/* ⭐ 新增 */}
+          <Tab label="가입된 팀" />
         </Tabs>
 
         {/* Feed Grid */}
         {tabValue < 2 ? (
+          // Tab 0 和 Tab 1：Feed 网格
           feeds.length > 0 ? (
             <Grid container spacing={2}>
               {feeds.map((feed) => (
@@ -640,7 +678,8 @@ function MyPage() {
               </Typography>
             </Box>
           )
-        ) : (
+        ) : tabValue === 2 ? (
+          // Tab 2：내 팀（我创建的队伍）
           myGroups.length > 0 ? (
             <Grid container spacing={2}>
               {myGroups.map((group) => (
@@ -725,6 +764,149 @@ function MyPage() {
             <Box sx={{ textAlign: 'center', py: 8, color: '#999' }}>
               <Typography variant="h6">
                 팀장으로 있는 팀이 없습니다
+              </Typography>
+            </Box>
+          )
+        ) : (
+          // Tab 3：가입된 팀（我加入的队伍）
+          joinedGroups.length > 0 ? (
+            <Grid container spacing={2}>
+              {joinedGroups.map((group) => (
+                <Grid item xs={12} key={group.groupId}>
+                  <Card
+                    sx={{
+                      borderRadius: '16px',
+                      cursor: 'pointer',
+                      position: 'relative',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 16px rgba(150, 172, 193, 0.2)'
+                      },
+                      transition: 'all 0.3s'
+                    }}
+                    onClick={() => {
+                      if (group.currentActivityId) {
+                        navigate(`/group/${group.groupId}/activity`);
+                      } else {
+                        navigate(`/group/${group.groupId}`);
+                      }
+                    }}
+                  >
+                    {/* 进行中活动标记 */}
+                    {group.currentActivityId && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 12,
+                          right: 12,
+                          bgcolor: '#2196F3',
+                          color: '#fff',
+                          px: 2,
+                          py: 0.5,
+                          borderRadius: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          zIndex: 1
+                        }}
+                      >
+                        <PeopleIcon sx={{ fontSize: 16 }} />
+                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                          활동 중
+                        </Typography>
+                      </Box>
+                    )}
+
+                    <CardContent sx={{ p: 3 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                            {group.groupName}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
+                            {group.routeName}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#999' }}>
+                            {group.district} · {group.startLocation} → {group.endLocation}
+                          </Typography>
+                        </Box>
+                        <Chip
+                          label={
+                            group.status === 'recruiting' ? '모집중' :
+                              group.status === 'full' ? '모집완료' :
+                                group.status === 'active' ? '진행중' : '종료'
+                          }
+                          sx={{
+                            bgcolor:
+                              group.status === 'recruiting' ? '#4CAF50' :
+                                group.status === 'full' ? '#FF9800' :
+                                  group.status === 'active' ? '#2196F3' : '#9E9E9E',
+                            color: '#fff',
+                            fontWeight: 600
+                          }}
+                        />
+                      </Box>
+
+                      {/* 我的区间信息 */}
+                      <Box sx={{ p: 2, bgcolor: '#F5F8FA', borderRadius: '12px', mb: 2 }}>
+                        <Typography variant="caption" sx={{ color: '#666', display: 'block', mb: 0.5 }}>
+                          내 담당 구간
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#2196F3' }}>
+                          {group.mySegmentName || '미배정'}
+                        </Typography>
+                        {group.myCompletionRate != null && (
+                          <Typography variant="caption" sx={{ color: '#666', display: 'block', mt: 1 }}>
+                            완료율: {typeof group.myCompletionRate === 'number' ? group.myCompletionRate.toFixed(1) : parseFloat(group.myCompletionRate || 0).toFixed(1)}%
+                          </Typography>
+                        )}
+                      </Box>
+
+                      <Divider sx={{ my: 2 }} />
+
+                      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                        <Chip
+                          label={`${group.totalDistance}km`}
+                          size="small"
+                          sx={{ bgcolor: '#F5F5F5' }}
+                        />
+                        <Chip
+                          label={`약 ${group.estimatedTime}분`}
+                          size="small"
+                          sx={{ bgcolor: '#F5F5F5' }}
+                        />
+                        <Chip
+                          label={`${group.memberCount}/${group.maxMembers}명`}
+                          size="small"
+                          sx={{ bgcolor: '#96ACC1', color: '#fff' }}
+                        />
+                        <Chip
+                          label={
+                            group.intensityLevel === 'beginner' ? '초급' :
+                              group.intensityLevel === 'intermediate' ? '중급' : '고급'
+                          }
+                          size="small"
+                          sx={{
+                            bgcolor:
+                              group.intensityLevel === 'beginner' ? '#4CAF50' :
+                                group.intensityLevel === 'intermediate' ? '#FF9800' : '#F44336',
+                            color: '#fff'
+                          }}
+                        />
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Box sx={{ textAlign: 'center', py: 8, color: '#999' }}>
+              <PeopleIcon sx={{ fontSize: 64, mb: 2, opacity: 0.3 }} />
+              <Typography variant="h6">
+                가입된 팀이 없습니다
+              </Typography>
+              <Typography variant="body2">
+                팀에 가입하여 활동을 시작해보세요!
               </Typography>
             </Box>
           )
@@ -883,6 +1065,41 @@ function MyPage() {
               {selectedFeed?.content}
             </Typography>
 
+            {/* ⭐ 显示同伴列表 */}
+            {selectedFeed?.companions && selectedFeed.companions.length > 0 && (
+              <Box sx={{ mb: 3, p: 2, bgcolor: '#F5F8FA', borderRadius: '12px' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <PeopleIcon sx={{ fontSize: 18, color: '#96ACC1', mr: 0.5 }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#96ACC1' }}>
+                    함께 달린 사람
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                  {selectedFeed.companions.map((companion) => (
+                    <Chip
+                      key={companion.userId}
+                      avatar={
+                        <Avatar
+                          src={companion.profileImg}
+                          sx={{ width: 24, height: 24 }}
+                        >
+                          {companion.nickname?.charAt(0).toUpperCase()}
+                        </Avatar>
+                      }
+                      label={companion.nickname}
+                      size="small"
+                      onClick={() => navigate(`/profile/${companion.userId}`)}
+                      sx={{
+                        bgcolor: '#fff',
+                        cursor: 'pointer',
+                        '&:hover': { bgcolor: '#E3F2FD' }
+                      }}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            )}
+
             <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
               댓글 ({comments.length})
             </Typography>
@@ -929,18 +1146,19 @@ function MyPage() {
             {followers.map((follower) => (
               <ListItem
                 key={follower.userId}
-                button
-                onClick={() => handleUserClick(follower.userId)}
+                disablePadding  // ⭐ 添加这个
               >
-                <ListItemAvatar>
-                  <Avatar src={follower.profileImg} sx={{ bgcolor: '#96ACC1' }}>
-                    {follower.nickname?.charAt(0).toUpperCase()}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={follower.nickname}
-                  secondary={follower.intro || `@${follower.userId}`}
-                />
+                <ListItemButton onClick={() => handleUserClick(follower.userId)}>  {/* ⭐ 改用 ListItemButton */}
+                  <ListItemAvatar>
+                    <Avatar src={follower.profileImg} sx={{ bgcolor: '#96ACC1' }}>
+                      {follower.nickname?.charAt(0).toUpperCase()}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={follower.nickname}
+                    secondary={follower.intro || `@${follower.userId}`}
+                  />
+                </ListItemButton>
               </ListItem>
             ))}
           </List>
@@ -955,18 +1173,19 @@ function MyPage() {
             {following.map((user) => (
               <ListItem
                 key={user.userId}
-                button
-                onClick={() => handleUserClick(user.userId)}
+                disablePadding  // ⭐ 添加这个
               >
-                <ListItemAvatar>
-                  <Avatar src={user.profileImg} sx={{ bgcolor: '#96ACC1' }}>
-                    {user.nickname?.charAt(0).toUpperCase()}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={user.nickname}
-                  secondary={user.intro || `@${user.userId}`}
-                />
+                <ListItemButton onClick={() => handleUserClick(user.userId)}>  {/* ⭐ 改用 ListItemButton */}
+                  <ListItemAvatar>
+                    <Avatar src={user.profileImg} sx={{ bgcolor: '#96ACC1' }}>
+                      {user.nickname?.charAt(0).toUpperCase()}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={user.nickname}
+                    secondary={user.intro || `@${user.userId}`}
+                  />
+                </ListItemButton>
               </ListItem>
             ))}
           </List>
@@ -974,6 +1193,10 @@ function MyPage() {
       </Dialog>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+        <MenuItem onClick={handleEditClick}>
+          <EditIcon sx={{ mr: 1, fontSize: 20 }} />
+          수정
+        </MenuItem>
         <MenuItem onClick={handleDeleteClick}>
           <DeleteIcon sx={{ mr: 1, fontSize: 20 }} />
           삭제

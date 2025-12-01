@@ -1187,4 +1187,124 @@ router.post("/activity/:activityId/cancel", authMiddleware, async (req, res) => 
         res.status(500).json({ result: "fail", msg: "취소 실패" });
     }
 });
+
+
+// 获取用户所有已完成的活动
+router.get("/user/:userId/completed-activities", async (req, res) => {
+    let { userId } = req.params;
+    
+    try {
+        // 获取用户参与的所有已完成活动
+        let sql = `
+            SELECT DISTINCT
+                A.activityId, A.groupId, A.routeId, A.scheduledDate, A.scheduledTime,
+                A.actualStartTime, A.actualEndTime, A.status,
+                G.groupName,
+                R.routeName, R.totalDistance, R.estimatedTime, R.district,
+                R.startLocation, R.endLocation
+            FROM TBL_ACTIVITY_HISTORY A
+            LEFT JOIN TBL_GROUP G ON A.groupId = G.groupId
+            LEFT JOIN TBL_ROUTE R ON A.routeId = R.routeId
+            WHERE A.activityId IN (
+                SELECT DISTINCT activityId 
+                FROM TBL_ACTIVITY_SEGMENT_RECORD 
+                WHERE userId = ?
+            )
+            AND A.status = 'completed'
+            ORDER BY A.actualEndTime DESC
+        `;
+        
+        let [activities] = await db.query(sql, [userId]);
+        
+        // 为每个活动获取详细记录
+        for (let activity of activities) {
+            // 获取该用户在这个活动中的所有段记录
+            let recordSql = `
+                SELECT 
+                    R.*,
+                    S.segmentName, S.segmentOrder, S.startPoint, S.endPoint,
+                    S.segmentDistance, S.estimatedTime,
+                    U.nickname, U.profileImg
+                FROM TBL_ACTIVITY_SEGMENT_RECORD R
+                LEFT JOIN TBL_ROUTE_SEGMENT S ON R.segmentId = S.segmentId
+                LEFT JOIN users_tbl U ON R.userId = U.userId
+                WHERE R.activityId = ? AND R.userId = ?
+                ORDER BY S.segmentOrder ASC
+            `;
+            let [userRecords] = await db.query(recordSql, [activity.activityId, userId]);
+            activity.myRecords = userRecords;
+            
+            // 为每条记录获取一起跑的人（同一段的其他人）
+            for (let record of userRecords) {
+                let companionSql = `
+                    SELECT 
+                        R.userId, R.role,
+                        U.nickname, U.profileImg
+                    FROM TBL_ACTIVITY_SEGMENT_RECORD R
+                    LEFT JOIN users_tbl U ON R.userId = U.userId
+                    WHERE R.activityId = ? 
+                    AND R.segmentId = ?
+                    AND R.userId != ?
+                `;
+                let [companions] = await db.query(companionSql, [
+                    activity.activityId, 
+                    record.segmentId, 
+                    userId
+                ]);
+                record.companions = companions;
+            }
+            
+            // 检查是否已经为这个活动写过feed
+            let [existingFeed] = await db.query(
+                "SELECT feedId FROM TBL_FEED WHERE userId = ? AND historyId = ?",
+                [userId, activity.activityId]
+            );
+            activity.hasFeed = existingFeed.length > 0;
+            if (activity.hasFeed) {
+                activity.feedId = existingFeed[0].feedId;
+            }
+        }
+        
+        res.json({ result: "success", activities });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ result: "fail", msg: "활동 내역 조회 실패" });
+    }
+});
+
+
+// 获取用户加入的所有队伍（不包括自己创建的）
+router.get("/user/:userId/joined-groups", async (req, res) => {
+    let { userId } = req.params;
+    
+    try {
+        let sql = `
+            SELECT 
+                G.*,
+                R.routeName, R.totalDistance, R.estimatedTime, R.intensityLevel, R.avgPace,
+                R.startLocation, R.endLocation,
+                U.nickname as leaderNickname, U.profileImg as leaderProfileImg,
+                GM.assignedSegmentId, GM.role, GM.joinedAt, GM.completionRate as myCompletionRate,
+                S.segmentName as mySegmentName, S.segmentOrder as mySegmentOrder,
+                (SELECT COUNT(*) FROM TBL_GROUP_MEMBER WHERE groupId = G.groupId) as memberCount,
+                (SELECT activityId FROM TBL_ACTIVITY_HISTORY 
+                 WHERE groupId = G.groupId AND status = 'ongoing' 
+                 LIMIT 1) as currentActivityId
+            FROM TBL_GROUP_MEMBER GM
+            LEFT JOIN TBL_GROUP G ON GM.groupId = G.groupId
+            LEFT JOIN TBL_ROUTE R ON G.routeId = R.routeId
+            LEFT JOIN users_tbl U ON G.leaderId = U.userId
+            LEFT JOIN TBL_ROUTE_SEGMENT S ON GM.assignedSegmentId = S.segmentId
+            WHERE GM.userId = ? AND GM.role != 'leader'
+            ORDER BY G.cdatetime DESC
+        `;
+        
+        let [groups] = await db.query(sql, [userId]);
+        
+        res.json({ result: "success", groups });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ result: "fail", msg: "가입된 팀 조회 실패" });
+    }
+});
 module.exports = router;
