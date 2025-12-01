@@ -1,4 +1,4 @@
-# 🌟 项目名称 Sweatin'SkyBlue
+# Sweatin'SkyBlue
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue)](#)
@@ -6,9 +6,19 @@
 
 ---
 
-## 🔥 项目简介 Project Description
-一句话概述项目功能和价值。  
-例如：一个可以快速管理任务、生成可视化统计的全栈应用。
+## 💡 프로젝트 소개 Project Description
+Sweatin'SkyBlue라는 이름은 우울함과 극복의 비유에서 영감을 받았습니다.  
+Matt Haig의 말처럼:
+
+> 우울함은… 하늘을 가로지르는 어두운 구름과 같다.  
+> 하지만 만약 그것이 은유라면, 당신은 바로 하늘이다.  
+> 구름이 오기 전에도 당신은 거기에 있었다.  
+> 그리고 구름은 하늘 없이는 존재할 수 없지만, 하늘은 구름 없이도 존재할 수 있다.
+
+이 프로젝트는 달리기와 운동을 통해 흘린 땀(Sweat)이 마음의 구름을 걷어내고,  
+우리 내면의 하늘(Sky)을 느낄 수 있도록 돕는 경험을 목표로 합니다.  
+이름 속 “Blue”는 단순히 맑은 하늘(SkyBlue)을 의미하는 동시에,  
+우울함(Blue)과 맞서 싸우며 마음을 회복하는 의미도 담고 있습니다. 
 
 ---
 
