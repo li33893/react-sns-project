@@ -1,4 +1,4 @@
-# 🌧️ Sweatin'SkyBlue
+# 🟦🌧️ Sweatin'SkyBlue
 
 ## 기능 소개
 
