@@ -5,10 +5,15 @@
 ### 로그인 & 회원가입
 ---
 #### 1.1 로그인 화면
-<img src="./img/login.png" alt="로그인" width="300" style="display:block; margin:auto"/>
+<p align="center">
+   <img src="./img/login.png" alt="로그인" width="300" style="display:block; margin:auto"/>
+</p>
 
 #### 1.2 회원가입 화면
-<img src="./img/signup.png" alt="회원가입" width="200" height="600" style="display:block; margin:auto"/>
+<p align="center">
+  <img src="./img/signup.png" alt="회원가입" width="200" height="600" />
+</p>
+
 
 ### 2. 팀 구성
 ---
