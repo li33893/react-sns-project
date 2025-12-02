@@ -88,13 +88,15 @@
 <p align="center">
        <img src="./img/relayleaderstart.png" alt="정상 릴레이" width="400" />
 </p>
-의도외의 상황(지각, 전에 달리는 사람이 시간내에 다음 사람을 만나지 못함 등)을 방지하기 위하여 팀장은 "skip"기능을 보유됩니다. skip된 사람은 시간내에 달리지 못한 사람과 마찬가지로 달리기 마치지 못하여 완성율이 떨어집니다.
+의도외의 상황(지각, 전에 달리는 사람이 시간내에 다음 사람을 만나지 못함 등)을 방지하기 위하여 팀장은 "skip"기능을 보유됩니다. 
 <p align="center">
        <img src="./img/skip.png" alt="스킵" width="400" />
 </p>
+skip된 사람은 시간내에 달리지 못한 사람과 마찬가지로 달리기 마치지 못하여 완성율이 떨어집니다.
 <p align="center">
        <img src="./img/ratedrop.png" alt="스킵" width="400" />
 </p>
+정상적으로 완성될 때와 대비:
 <p align="center">
        <img src="./img/ratemaintain.png" alt="스킵" width="400" />
 </p>
