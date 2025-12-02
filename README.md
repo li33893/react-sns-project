@@ -21,7 +21,6 @@
 
 #### 1. 🏃‍♀️ 팀 구성 (달리기)
 
-> #### 달리기 과정
 <div style="border:1px solid #ccc; padding:10px; font-size:smaller; border-radius:5px; background-color:#f9f9f9;">
 <b>[형식]</b><br>
 주로 릴레이 방식입니다.<br><br>
@@ -40,6 +39,7 @@
 - 팀장은 과정을 직접 제어 가능<br>
 - 특정 인원을 건너뛰어 다음 사람 달리기에 영향 주지 않도록 설정 가능
 </div>
+
 
 
 
