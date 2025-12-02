@@ -57,40 +57,40 @@
 1.2  **팀 가입 신청 및 승인:** 
 메뉴 바의 "팀"에 있으며, 피드와 유사한 인터페이스로, 기본적으로 자택 근처(구 단위)의 팀들이 카드 형태로 표시됩니다. 또한 사용자가 다른 시/구 및 강도를 선택하여 필터링할 수 있는 선택 옵션이 있습니다.
  <p align="center">
-       <img src="./img/teamselection.png" alt="팀선택" width="400" />
+       <img src="./img/teamselection.png" alt="팀선택" width="500" />
 </p>
 클릭하면,팀 상세로 가는데 여기에서 신청하거나 팀장이 신청을 승이/거절할 수 있습니다.
 <p align="center">
-       <img src="./img/teamdetail.png" alt="팀 상세" width="400" />
+       <img src="./img/teamdetail.png" alt="팀 상세" width="500" />
 </p>
  신청서 작성시 자신의 건강 상태(특히 동반 질환),  직업, 신청 이유, 희망 달리기 구간을 사실대로 기재합니다.
  <p align="center">
-       <img src="./img/app.png" alt="팀 상세" width="400" />
+       <img src="./img/app.png" alt="팀 상세" width="500" />
 </p>
 
 팀장은 신청서를 검토하여 승인 또는 거절합니다. 승인 전 상태는 '검토 중'이며, 승인되면 해당 인원이 팀에 합류합니다. 거절 시 거절 사유가 전송됩니다. 
  <p align="center">
-       <img src="./img/appadmin1.png" alt="팀 승인1" width="400" /> 
+       <img src="./img/appadmin1.png" alt="팀 승인1" width="500" /> 
 </p>
 <p align="center">
-       <img src="./img/appadmin2.png" alt="팀 승인2" width="400" />
+       <img src="./img/appadmin2.png" alt="팀 승인2" width="500" />
 </p>
 
 1.3 **달리기 과정:** 
 마이페이지-내팀에서 팀을 선택해서 들어갑니다.
 <p align="center">
-       <img src="./img/relaystartpage.png" alt="리레이 시작" width="400" />
+       <img src="./img/relaystartpage.png" alt="리레이 시작" width="500" />
 </p>
 
 팀장이 시작 버턴을 누르면 릴레이 활동이 정식으로 시작합니다. 팀장이 무조근 제일 먼저 혼자서 달립니다. 
 <br>
 만약에 "내"가 주자로서 릴레이하면 다음 사람이 주자가되고 "나"는 동반자로 같이 달립니다. 그러다가 시간내에 다다음 사람이 주자가되면 나의 달리기는 끝마칩니다.
 <p align="center">
-       <img src="./img/relayleaderstart.png" alt="정상 릴레이" width="400" />
+       <img src="./img/relayleaderstart.png" alt="정상 릴레이" width="500" />
 </p>
 의도외의 상황(지각, 전에 달리는 사람이 시간내에 다음 사람을 만나지 못함 등)을 방지하기 위하여 팀장은 "skip"기능을 보유됩니다. 
 <p align="center">
-       <img src="./img/skip.png" alt="스킵" width="400" />
+       <img src="./img/skip.png" alt="스킵" width="500" />
 </p>
 skip된 사람은 시간내에 달리지 못한 사람과 마찬가지로 달리기 마치지 못하여 완성율이 떨어집니다.
 <p align="center">
@@ -107,7 +107,7 @@ skip된 사람은 시간내에 달리지 못한 사람과 마찬가지로 달리
 
 채팅 그룹은 다중 사용자 채팅 그룹입니다. 팀 모집이 끝나자마자 나타납니다.
 <p align="center">
-       <img src="./img/groupchat.png" alt="그룹챗" width="400" />
+       <img src="./img/groupchat.png" alt="그룹챗" width="500" />
 </p>
 
 
