@@ -24,6 +24,17 @@ router.post("/route", authMiddleware, async (req, res) => {
     }
 
     try {
+        // Extract numeric value from avgPace (e.g., "5min/km" or "5분/km" -> 5)
+        let avgPaceNumeric = null;
+        if (avgPace) {
+            if (typeof avgPace === 'string') {
+                const match = avgPace.match(/[\d.]+/);
+                avgPaceNumeric = match ? parseFloat(match[0]) : null;
+            } else {
+                avgPaceNumeric = parseFloat(avgPace);
+            }
+        }
+
         // 1. 插入路线基本信息
         let routeSql = `
             INSERT INTO TBL_ROUTE 
@@ -34,7 +45,7 @@ router.post("/route", authMiddleware, async (req, res) => {
 
         let [routeResult] = await db.query(routeSql, [
             routeName, district, startLocation, endLocation, totalDistance, estimatedTime,
-            segments.length, intensityLevel || 'intermediate', avgPace || null,
+            segments.length, intensityLevel || 'intermediate', avgPaceNumeric,
             description || null, createdBy
         ]);
 

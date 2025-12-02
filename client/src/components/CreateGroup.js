@@ -342,7 +342,7 @@ function CreateGroup() {
                   label="평균 페이스 (선택)"
                   fullWidth
                   margin="normal"
-                  placeholder="예: 6분 30초/km"
+                  placeholder="예: 6min/km (한글x)"
                   value={routeForm.avgPace}
                   onChange={(e) => setRouteForm({ ...routeForm, avgPace: e.target.value })}
                 />
