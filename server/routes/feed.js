@@ -402,12 +402,14 @@ router.get("/detail/:feedId", async (req, res) => {
 
   try {
     let sql = `
-      SELECT F.*, 
-             I.imgId, I.fileName, I.filePath, I.is_thumbnail
-      FROM TBL_FEED F
-      LEFT JOIN TBL_FEED_IMG I ON F.feedId = I.feedId
-      WHERE F.feedId = ?
-    `;
+        SELECT F.*, 
+                I.imgId, I.fileName, I.filePath, I.is_thumbnail,
+                U.nickname, U.profileImg
+        FROM TBL_FEED F
+        LEFT JOIN TBL_FEED_IMG I ON F.feedId = I.feedId
+        LEFT JOIN users_tbl U ON F.userId = U.userId
+        WHERE F.feedId = ?
+        `;
     let [rows] = await db.query(sql, [feedId]);
 
     if (rows.length === 0) {
@@ -415,17 +417,19 @@ router.get("/detail/:feedId", async (req, res) => {
     }
 
     let feed = {
-      feedId: rows[0].feedId,
-      userId: rows[0].userId,
-      feedType: rows[0].feedType,
-      title: rows[0].title,
-      content: rows[0].content,
-      isAnonymous: rows[0].isAnonymous,
-      groupId: rows[0].groupId,
-      routeId: rows[0].routeId,
-      historyId: rows[0].historyId,
-      location: rows[0].location,
-      images: []
+        feedId: rows[0].feedId,
+        userId: rows[0].userId,
+        feedType: rows[0].feedType,
+        title: rows[0].title,
+        content: rows[0].content,
+        isAnonymous: rows[0].isAnonymous,
+        groupId: rows[0].groupId,
+        routeId: rows[0].routeId,
+        historyId: rows[0].historyId,
+        location: rows[0].location,
+        nickname: rows[0].nickname,      // ⭐ 添加
+        profileImg: rows[0].profileImg,  // ⭐ 添加
+        images: []
     };
 
     console.log('📝 Feed 基本信息:', {

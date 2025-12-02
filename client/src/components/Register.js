@@ -50,17 +50,24 @@ function Register() {
   }, [category, activityData]);
 
   const handleFileChange = (event) => {
-    const newFiles = Array.from(event.target.files);
-    const currentFiles = Array.from(files);
+  const newFiles = Array.from(event.target.files);
+  
+  // ✅ 使用函数式更新，确保获取最新的 state
+  setFile(prevFiles => {
+    const currentFiles = Array.from(prevFiles);
     const totalFiles = currentFiles.concat(newFiles);
 
     if (totalFiles.length > MAX_IMAGES) {
       alert(`최대 ${MAX_IMAGES}개의 이미지만 업로드할 수 있습니다`);
-      setFile(totalFiles.slice(0, MAX_IMAGES));
+      return totalFiles.slice(0, MAX_IMAGES);
     } else {
-      setFile(totalFiles);
+      return totalFiles;
     }
-  };
+  });
+  
+  // ⭐ 重置 input，允许选择同一文件
+  event.target.value = '';
+};
 
   const removeImage = (index) => {
     const newFiles = Array.from(files).filter((_, i) => i !== index);
