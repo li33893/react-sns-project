@@ -45,9 +45,13 @@
 1.1 **팀장 신청 (팀 생성):**  
    달리기 팀의 팀장 신청은 코스 90% 이상 무결석(신용도 양호) 조건을 충족해야 합니다. 또한 자신이 경로, 강도, 시간을 직접 설계해야 합니다.
    <p align="center">
-     <img src="./img/creategorup1.png" alt="회원가입" width="200" />
-      <img src="./img/creategroup2.png" alt="회원가입" width="200" />
-       <img src="./img/creategroup3.png" alt="회원가입" width="200" />
+       <img src="./img/creategroup1.png" alt="팀생성1" width="400" />
+   </p>
+   <p align="center">
+      <img src="./img/creategroup2.png" alt="팀생성2" width="400" />
+   </p>
+   <p align="center">
+       <img src="./img/creategroup3.png" alt="팀생성3" width="400" />
    </p>
    
 
