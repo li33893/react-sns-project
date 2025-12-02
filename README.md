@@ -4,6 +4,68 @@
 <sub>"구름이 하늘을 지배하는 것처럼 보일 때도, 하늘은 여전히 하늘로 남아 있습니다. 구름은 결국 흘러가지만 하늘은 그 자리에 있습니다. 당신이 우울증보다 크다는 것, 그것이 당신 안에서 작동할 뿐 당신이 그 안에서 작동하는 것이 아니라는 것"</sub>
 <sub>뛰며 땀으로 구름을 걷어내는 뜻으로 이 이름을 지었습니다.</sub>
 
+
+## 🔧 사용 기술
+
+**개발 기간**: 2025.11.25 ~ 2025.12.02 (8일)
+
+---
+
+### Frontend
+
+| 기술명 | 설명 |
+|--------|------|
+| ![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react&logoColor=white) | React 18.3.1 - 최신 React 기능을 활용한 컴포넌트 기반 개발 |
+| ![Material-UI](https://img.shields.io/badge/Material--UI-6.1.5-007FFF?logo=mui&logoColor=white) | Material-UI 6.1.5 - 일관된 UI 컴포넌트 라이브러리 |
+| ![React Router](https://img.shields.io/badge/React_Router-6.27.0-CA4245?logo=react-router&logoColor=white) | React Router 6.27.0 - 클라이언트 사이드 라우팅 |
+| ![Socket.io-Client](https://img.shields.io/badge/Socket.io--Client-4.8.1-010101?logo=socket.io&logoColor=white) | Socket.io-client 4.8.1 - 실시간 채팅 WebSocket 클라이언트 |
+| ![JWT Decode](https://img.shields.io/badge/JWT_Decode-4.0.0-000000?logo=jsonwebtokens&logoColor=white) | jwt-decode 4.0.0 - JWT 토큰 디코딩 |
+
+---
+
+### Backend
+
+| 기술명 | 설명 |
+|--------|------|
+| ![Node.js](https://img.shields.io/badge/Node.js-24.11.1-339933?logo=node.js&logoColor=white) | Node.js 24.11.1 - 비동기 이벤트 기반 서버 런타임 |
+| ![Express](https://img.shields.io/badge/Express-5.1.0-000000?logo=express&logoColor=white) | Express 5.1.0 - 간결한 웹 프레임워크 |
+| ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white) | MySQL 8.0 - 관계형 데이터베이스 |
+| ![Socket.io](https://img.shields.io/badge/Socket.io-4.7.2-010101?logo=socket.io&logoColor=white) | Socket.io 4.7.2 - 실시간 채팅 WebSocket 서버 |
+| ![JWT](https://img.shields.io/badge/JWT-9.0.2-000000?logo=jsonwebtokens&logoColor=white) | JWT 9.0.2 - 토큰 기반 인증 |
+| ![bcrypt](https://img.shields.io/badge/bcrypt-6.0.0-338033?logo=letsencrypt&logoColor=white) | bcrypt 6.0.0 - 비밀번호 해싱 (saltRounds: 10) |
+| ![Multer](https://img.shields.io/badge/Multer-2.0.2-FF6600?logo=files&logoColor=white) | Multer 2.0.2 - 파일 업로드 처리 |
+
+---
+
+### 외부 API
+
+| 기술명 | 설명 |
+|--------|------|
+| ![Daum Postcode](https://img.shields.io/badge/Daum_Postcode-API-FFCD00?logo=kakao&logoColor=black) | Daum 우편번호 API - 주소 검색 서비스 |
+
+---
+
+## 🏗️ 주요 기능별 기술 스택
+
+### 실시간 채팅
+- **Frontend**: Socket.io-client 4.8.1
+- **Backend**: Socket.io 4.7.2
+- **특징**: WebSocket 기반 실시간 양방향 통신
+
+### 인증 시스템
+- **암호화**: bcrypt 6.0.0 (saltRounds: 10)
+- **토큰**: JWT 9.0.2
+- **유효기간**: 1시간
+
+### 파일 업로드
+- **라이브러리**: Multer 2.0.2
+- **지원 파일**: 프로필 이미지, 피드 이미지 (최대 9장), 채팅 이미지
+- **저장 위치**: 로컬 서버 `uploads/` 디렉토리
+
+### 주소 검색
+- **API**: Daum Postcode API
+- **기능**: 도로명 주소 기반 검색 및 자동 완성
+
 ## 배경 및 기능 설계
 
 
