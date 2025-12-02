@@ -62,7 +62,7 @@
 <p align="center">
        <img src="./img/teamdetail.png" alt="팀 상세" width="400" />
 </p>
- 신청서 작성시 자신의 건강 상태(특히 동반 질환), 이름, 나이, 성별(자동 입력), 직업, 신청 이유(textarea), 희망 달리기 구간(option)을 사실대로 기재합니다.
+ 신청서 작성시 자신의 건강 상태(특히 동반 질환),  직업, 신청 이유, 희망 달리기 구간을 사실대로 기재합니다.
  <p align="center">
        <img src="./img/app.png" alt="팀 상세" width="400" />
 </p>
