@@ -514,4 +514,109 @@ router.delete("/rooms/:roomId/leave", authMiddleware, async (req, res) => {
     }
 });
 
+
+// 在 message.js 中添加以下路由
+
+// ============ 搜索功能 ============
+
+// 搜索用户（用于创建私聊）
+router.get("/search/users", authMiddleware, async (req, res) => {
+    const { query, currentUserId } = req.query;
+
+    if (!query || query.trim().length < 1) {
+        return res.json({ users: [], result: "success" });
+    }
+
+    try {
+        const searchPattern = `%${query.trim()}%`;
+        
+        const sql = `
+            SELECT 
+                U.userId,
+                U.nickname,
+                U.profileImg,
+                U.addr,
+                -- 检查是否已有私聊
+                (
+                    SELECT R.roomId 
+                    FROM tbl_chat_room R
+                    INNER JOIN tbl_chat_member CM1 ON R.roomId = CM1.roomId
+                    INNER JOIN tbl_chat_member CM2 ON R.roomId = CM2.roomId
+                    WHERE R.roomType = 'private'
+                    AND CM1.userId = ?
+                    AND CM2.userId = U.userId
+                    AND (SELECT COUNT(*) FROM tbl_chat_member WHERE roomId = R.roomId) = 2
+                    LIMIT 1
+                ) AS existingRoomId
+            FROM users_tbl U
+            WHERE U.userId != ?
+            AND (U.nickname LIKE ? OR U.userId LIKE ?)
+            LIMIT 20
+        `;
+
+        const [users] = await db.query(sql, [
+            currentUserId,
+            currentUserId,
+            searchPattern,
+            searchPattern
+        ]);
+
+        res.json({
+            users,
+            result: "success"
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Failed to search users" });
+    }
+});
+
+// 搜索聊天室（用于搜索群聊）
+router.get("/search/rooms", authMiddleware, async (req, res) => {
+    const { query, userId } = req.query;
+
+    if (!query || query.trim().length < 1) {
+        return res.json({ rooms: [], result: "success" });
+    }
+
+    try {
+        const searchPattern = `%${query.trim()}%`;
+        
+        const sql = `
+            SELECT 
+                R.roomId,
+                R.roomType,
+                R.roomName,
+                R.relatedGroupId,
+                G.groupName,
+                G.district,
+                -- 检查用户是否已在此聊天室
+                (
+                    SELECT COUNT(*) 
+                    FROM tbl_chat_member 
+                    WHERE roomId = R.roomId AND userId = ?
+                ) AS isMember
+            FROM tbl_chat_room R
+            LEFT JOIN tbl_group G ON R.relatedGroupId = G.groupId
+            WHERE R.roomType = 'group'
+            AND (R.roomName LIKE ? OR G.groupName LIKE ?)
+            LIMIT 20
+        `;
+
+        const [rooms] = await db.query(sql, [
+            userId,
+            searchPattern,
+            searchPattern
+        ]);
+
+        res.json({
+            rooms,
+            result: "success"
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Failed to search rooms" });
+    }
+});
+
 module.exports = router;

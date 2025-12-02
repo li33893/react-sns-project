@@ -887,6 +887,7 @@ router.get("/:groupId/activity/current", async (req, res) => {
 });
 // ⭐ 接力（传递给下一个段）
 // ⭐ 接力（传递给下一个段）
+// ⭐ 修复后的接力 API
 router.post("/activity/:activityId/relay", authMiddleware, async (req, res) => {
     let { activityId } = req.params;
     let { operatorId } = req.body;
@@ -931,26 +932,47 @@ router.post("/activity/:activityId/relay", authMiddleware, async (req, res) => {
 
         let currentSegmentOrder = currentRunning[0].segmentOrder;
 
-        // 4. ⭐ 标记当前段所有记录为完成，并判断是否按时
+        // ⭐ 4. 判断是队长代替还是跑步者自己完成
+        let leaderReplaced = isLeader && !isCurrentRunner;
+
+        // 5. 标记当前段所有记录为完成
         for (let record of currentRunning) {
             let actualEndTime = new Date();
             let personalDeadline = new Date(record.personalDeadline);
-            let isOnTime = actualEndTime <= personalDeadline;
-            let duration = Math.floor((actualEndTime - new Date(record.actualStartTime)) / 60000); // 分钟
+            let duration = Math.floor((actualEndTime - new Date(record.actualStartTime)) / 60000);
 
-            await db.query(
-                `UPDATE TBL_ACTIVITY_SEGMENT_RECORD 
-                 SET status = 'completed', 
-                     actualEndTime = NOW(), 
-                     actualDuration = ?,
-                     isOnTime = ?,
-                     udatetime = NOW()
-                 WHERE recordId = ?`,
-                [duration, isOnTime, record.recordId]
-            );
+            // ⭐ 如果是队长代替，直接标记为 skipped
+            if (leaderReplaced) {
+                await db.query(
+                    `UPDATE TBL_ACTIVITY_SEGMENT_RECORD 
+                     SET status = 'skipped',
+                         actualEndTime = NOW(),
+                         actualDuration = ?,
+                         isOnTime = FALSE,
+                         udatetime = NOW()
+                     WHERE recordId = ?`,
+                    [duration, record.recordId]
+                );
+                console.log(`⚠️  队长代替：${record.nickname} 被标记为 skipped`);
+            } else {
+                // ⭐ 跑步者自己完成，判断是否按时
+                let isOnTime = actualEndTime <= personalDeadline;
+                
+                await db.query(
+                    `UPDATE TBL_ACTIVITY_SEGMENT_RECORD 
+                     SET status = 'completed', 
+                         actualEndTime = NOW(), 
+                         actualDuration = ?,
+                         isOnTime = ?,
+                         udatetime = NOW()
+                     WHERE recordId = ?`,
+                    [duration, isOnTime, record.recordId]
+                );
+                console.log(`✅ ${record.nickname} 自己完成，按时: ${isOnTime}`);
+            }
         }
 
-        // 5. ⭐ 查找下一段的所有waiting记录
+        // 6. 查找下一段的所有waiting记录
         let [nextSegmentRecords] = await db.query(
             `SELECT R.*, S.segmentOrder, U.nickname
              FROM TBL_ACTIVITY_SEGMENT_RECORD R
@@ -963,13 +985,12 @@ router.post("/activity/:activityId/relay", authMiddleware, async (req, res) => {
             [activityId, currentSegmentOrder + 1]
         );
 
-        // 6. ⭐ 特殊判断：如果下一段只有1人，且就是当前的主跑者
+        // 7. 特殊判断：最后一人继续跑
         if (nextSegmentRecords.length === 1) {
             let nextRunner = nextSegmentRecords[0];
             let currentMainRunner = currentRunning.find(r => r.role === 'main_runner');
             
-            if (nextRunner.userId === currentMainRunner?.userId) {
-                // 这是最后一人的情况，直接启动他的第二段
+            if (nextRunner.userId === currentMainRunner?.userId && !leaderReplaced) {
                 await db.query(
                     `UPDATE TBL_ACTIVITY_SEGMENT_RECORD 
                      SET status = 'running', actualStartTime = NOW(), udatetime = NOW()
@@ -987,7 +1008,7 @@ router.post("/activity/:activityId/relay", authMiddleware, async (req, res) => {
             }
         }
 
-        // 7. 如果有下一段（正常接力）
+        // 8. 如果有下一段（正常接力）
         if (nextSegmentRecords.length > 0) {
             for (let record of nextSegmentRecords) {
                 await db.query(
@@ -999,13 +1020,18 @@ router.post("/activity/:activityId/relay", authMiddleware, async (req, res) => {
             }
 
             let nextRunners = nextSegmentRecords.map(r => r.nickname).join(', ');
+            let msg = leaderReplaced 
+                ? `${currentRunning.map(r => r.nickname).join(', ')}님을 스킵하고 ${nextRunners}님에게 릴레이했습니다`
+                : `${nextRunners}님에게 릴레이했습니다`;
+            
             res.json({
                 result: "success",
-                msg: `${nextRunners}님에게 릴레이했습니다`,
-                nextSegmentOrder: currentSegmentOrder + 1
+                msg: msg,
+                nextSegmentOrder: currentSegmentOrder + 1,
+                wasSkipped: leaderReplaced
             });
         } else {
-            // 8. 没有下一段了，活动结束
+            // 9. 活动结束
             await db.query(
                 `UPDATE TBL_ACTIVITY_HISTORY 
                  SET status = 'completed', actualEndTime = NOW(), udatetime = NOW()
@@ -1013,7 +1039,7 @@ router.post("/activity/:activityId/relay", authMiddleware, async (req, res) => {
                 [activityId]
             );
 
-            // 9. 计算每个成员的完成率
+            // 10. 计算完成率
             await calculateCompletionRates(activityId, activityInfo);
 
             res.json({
@@ -1027,139 +1053,194 @@ router.post("/activity/:activityId/relay", authMiddleware, async (req, res) => {
         res.status(500).json({ result: "fail", msg: "릴레이 실패", error: error.message });
     }
 });
-// ⭐ 计算完成率的辅助函数（重写）
+
+// ⭐ 修复后的完成率计算函数
 async function calculateCompletionRates(activityId, activity) {
     try {
-        // 1. 获取每个成员的最后一段
-        let [memberLastRecords] = await db.query(`
-            SELECT 
-                R.userId,
-                MAX(S.segmentOrder) AS lastSegmentOrder
-            FROM TBL_ACTIVITY_SEGMENT_RECORD R
-            LEFT JOIN TBL_ROUTE_SEGMENT S ON R.segmentId = S.segmentId
-            WHERE R.activityId = ?
-            GROUP BY R.userId
+        console.log('📊 开始计算完成率...');
+
+        // 1. 获取所有参与成员
+        let [participantRecords] = await db.query(`
+            SELECT DISTINCT userId
+            FROM TBL_ACTIVITY_SEGMENT_RECORD
+            WHERE activityId = ?
         `, [activityId]);
 
+        console.log('👥 参与人数:', participantRecords.length);
+
         // 2. 为每个成员计算完成率
-        for (let member of memberLastRecords) {
-            // 2.1 查询该成员最后一段的isOnTime
+        for (let participant of participantRecords) {
+            console.log('\n处理成员:', participant.userId);
+            
+            // 2.1 查询该成员的最后一段记录
             let [lastRecord] = await db.query(`
-                SELECT R.isOnTime
+                SELECT 
+                    R.status,
+                    R.isOnTime,
+                    R.role
                 FROM TBL_ACTIVITY_SEGMENT_RECORD R
                 LEFT JOIN TBL_ROUTE_SEGMENT S ON R.segmentId = S.segmentId
-                WHERE R.activityId = ? AND R.userId = ? AND S.segmentOrder = ?
+                WHERE R.activityId = ? AND R.userId = ?
+                ORDER BY S.segmentOrder DESC
                 LIMIT 1
-            `, [activityId, member.userId, member.lastSegmentOrder]);
-            
-            let isOnTime = lastRecord[0]?.isOnTime || false;
+            `, [activityId, participant.userId]);
 
-            // 2.2 更新该成员在队伍中的完成统计
-            if (isOnTime) {
-                await db.query(`
-                    UPDATE TBL_GROUP_MEMBER 
-                    SET totalActivities = totalActivities + 1,
-                        completedActivities = completedActivities + 1,
-                        completionRate = (completedActivities + 1) * 100.0 / (totalActivities + 1),
-                        udatetime = NOW()
-                    WHERE groupId = ? AND userId = ?
-                `, [activity.groupId, member.userId]);
-            } else {
-                await db.query(`
-                    UPDATE TBL_GROUP_MEMBER 
-                    SET totalActivities = totalActivities + 1,
-                        completionRate = completedActivities * 100.0 / (totalActivities + 1),
-                        udatetime = NOW()
-                    WHERE groupId = ? AND userId = ?
-                `, [activity.groupId, member.userId]);
+            if (!lastRecord || lastRecord.length === 0) {
+                console.log('  ⚠️  没有找到记录');
+                continue;
             }
 
-            // 2.3 更新用户总完成率（所有队伍的平均）
+            let record = lastRecord[0];
+            console.log('  最后一段状态:', record.status);
+
+            // 2.2 查询更新前数据
+            let [beforeData] = await db.query(
+                'SELECT totalActivities, completedActivities, completionRate FROM TBL_GROUP_MEMBER WHERE groupId = ? AND userId = ?',
+                [activity.groupId, participant.userId]
+            );
+            console.log('  更新前:', beforeData[0]);
+
+            // ⭐ 2.3 根据最后一段状态更新完成率
+            if (record.status === 'skipped') {
+                // 被跳过 = 没完成
+                // totalActivities +1, completedActivities 不变
+                await db.query(`
+                    UPDATE TBL_GROUP_MEMBER 
+                    SET totalActivities = totalActivities + 1,
+                        completionRate = (completedActivities * 100.0 / (totalActivities + 1)),
+                        udatetime = NOW()
+                    WHERE groupId = ? AND userId = ?
+                `, [activity.groupId, participant.userId]);
+                console.log('  ❌ 被跳过，完成率下降');
+
+            } else if (record.status === 'completed') {
+                // 正常完成，检查是否按时
+                if (record.isOnTime) {
+                    // 按时完成：两个都 +1
+                    await db.query(`
+                        UPDATE TBL_GROUP_MEMBER 
+                        SET totalActivities = totalActivities + 1,
+                            completedActivities = completedActivities + 1,
+                            completionRate = ((completedActivities + 1) * 100.0 / (totalActivities + 1)),
+                            udatetime = NOW()
+                        WHERE groupId = ? AND userId = ?
+                    `, [activity.groupId, participant.userId]);
+                    console.log('  ✅ 按时完成');
+                } else {
+                    // 超时完成：totalActivities +1, completedActivities 不变
+                    await db.query(`
+                        UPDATE TBL_GROUP_MEMBER 
+                        SET totalActivities = totalActivities + 1,
+                            completionRate = (completedActivities * 100.0 / (totalActivities + 1)),
+                            udatetime = NOW()
+                        WHERE groupId = ? AND userId = ?
+                    `, [activity.groupId, participant.userId]);
+                    console.log('  ⏰ 超时完成，完成率下降');
+                }
+            }
+
+            // 2.4 查询更新后数据
+            let [afterData] = await db.query(
+                'SELECT totalActivities, completedActivities, completionRate FROM TBL_GROUP_MEMBER WHERE groupId = ? AND userId = ?',
+                [activity.groupId, participant.userId]
+            );
+            console.log('  更新后:', afterData[0]);
+
+            // 2.5 更新用户总完成率
             await db.query(`
                 UPDATE users_tbl 
                 SET completionRate = (
-                    SELECT COALESCE(AVG(completionRate), 0) 
+                    SELECT CASE 
+                        WHEN SUM(totalActivities) > 0 
+                        THEN (SUM(completedActivities) * 100.0 / SUM(totalActivities))
+                        ELSE 100.0 
+                    END
                     FROM TBL_GROUP_MEMBER 
                     WHERE userId = ?
-                ), udatetime = NOW()
+                ),
+                udatetime = NOW()
                 WHERE userId = ?
-            `, [member.userId, member.userId]);
+            `, [participant.userId, participant.userId]);
         }
+        
+        console.log('✅ 완료율 계산 완료\n');
     } catch (error) {
-        console.log("完성률 계산 오류:", error);
+        console.log("❌ 완성률 계산 오류:", error);
     }
 }
-// 跳过某人（队长权限）
-router.post("/activity/:activityId/skip", authMiddleware, async (req, res) => {
-    let { activityId } = req.params;
-    let { userId, skipUserId } = req.body;
-    try {
-        // 1. 验证是否是队长
-        let [activity] = await db.query(
-            "SELECT A.groupId, G.leaderId FROM TBL_ACTIVITY_HISTORY A LEFT JOIN TBL_GROUP G ON A.groupId = G.groupId WHERE A.activityId = ?",
-            [activityId]
-        );
 
-        if (activity[0].leaderId !== userId) {
-            return res.status(403).json({ result: "fail", msg: "팀장만 스킵할 수 있습니다" });
-        }
 
-        // 2. 将被跳过的人的所有记录设为 'skipped'
-        await db.query(
-            `UPDATE TBL_ACTIVITY_SEGMENT_RECORD 
-         SET status = 'skipped', udatetime = NOW()
-         WHERE activityId = ? AND userId = ? AND status IN ('waiting', 'running')`,
-            [activityId, skipUserId]
-        );
+// // 跳过某人（队长权限）
+// router.post("/activity/:activityId/skip", authMiddleware, async (req, res) => {
+//     let { activityId } = req.params;
+//     let { userId, skipUserId } = req.body;
+//     try {
+//         // 1. 验证是否是队长
+//         let [activity] = await db.query(
+//             "SELECT A.groupId, G.leaderId FROM TBL_ACTIVITY_HISTORY A LEFT JOIN TBL_GROUP G ON A.groupId = G.groupId WHERE A.activityId = ?",
+//             [activityId]
+//         );
 
-        // 3. 如果当前段有该用户，需要重新查找下一段
-        let [currentRunning] = await db.query(
-            `SELECT R.*, S.segmentOrder
-         FROM TBL_ACTIVITY_SEGMENT_RECORD R
-         LEFT JOIN TBL_ROUTE_SEGMENT S ON R.segmentId = S.segmentId
-         WHERE R.activityId = ? AND R.status = 'running'`,
-            [activityId]
-        );
+//         if (activity[0].leaderId !== userId) {
+//             return res.status(403).json({ result: "fail", msg: "팀장만 스킵할 수 있습니다" });
+//         }
 
-        if (currentRunning.length === 0 || currentRunning.some(r => r.userId === skipUserId)) {
-            // 如果被跳过的人在当前段，找下一段
-            let currentSegmentOrder = currentRunning[0]?.segmentOrder || 0;
+//         // 2. 将被跳过的人的所有记录设为 'skipped'
+//         await db.query(
+//             `UPDATE TBL_ACTIVITY_SEGMENT_RECORD 
+//          SET status = 'skipped', udatetime = NOW()
+//          WHERE activityId = ? AND userId = ? AND status IN ('waiting', 'running')`,
+//             [activityId, skipUserId]
+//         );
 
-            let [nextSegmentRecords] = await db.query(
-                `SELECT R.*, U.nickname
-             FROM TBL_ACTIVITY_SEGMENT_RECORD R
-             LEFT JOIN TBL_ROUTE_SEGMENT S ON R.segmentId = S.segmentId
-             LEFT JOIN users_tbl U ON R.userId = U.userId
-             WHERE R.activityId = ? 
-             AND S.segmentOrder > ?
-             AND R.status = 'waiting'
-             AND R.userId != ?
-             ORDER BY S.segmentOrder ASC
-             LIMIT 2`,
-                [activityId, currentSegmentOrder, skipUserId]
-            );
+//         // 3. 如果当前段有该用户，需要重新查找下一段
+//         let [currentRunning] = await db.query(
+//             `SELECT R.*, S.segmentOrder
+//          FROM TBL_ACTIVITY_SEGMENT_RECORD R
+//          LEFT JOIN TBL_ROUTE_SEGMENT S ON R.segmentId = S.segmentId
+//          WHERE R.activityId = ? AND R.status = 'running'`,
+//             [activityId]
+//         );
 
-            if (nextSegmentRecords.length > 0) {
-                for (let record of nextSegmentRecords) {
-                    await db.query(
-                        `UPDATE TBL_ACTIVITY_SEGMENT_RECORD 
-                     SET status = 'running', actualStartTime = NOW(), udatetime = NOW()
-                     WHERE recordId = ?`,
-                        [record.recordId]
-                    );
-                }
-            }
-        }
+//         if (currentRunning.length === 0 || currentRunning.some(r => r.userId === skipUserId)) {
+//             // 如果被跳过的人在当前段，找下一段
+//             let currentSegmentOrder = currentRunning[0]?.segmentOrder || 0;
 
-        res.json({
-            result: "success",
-            msg: `${skipUserId}님을 스킵했습니다`
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ result: "fail", msg: "스킵 실패", error: error.message });
-    }
-});
+//             let [nextSegmentRecords] = await db.query(
+//                 `SELECT R.*, U.nickname
+//              FROM TBL_ACTIVITY_SEGMENT_RECORD R
+//              LEFT JOIN TBL_ROUTE_SEGMENT S ON R.segmentId = S.segmentId
+//              LEFT JOIN users_tbl U ON R.userId = U.userId
+//              WHERE R.activityId = ? 
+//              AND S.segmentOrder > ?
+//              AND R.status = 'waiting'
+//              AND R.userId != ?
+//              ORDER BY S.segmentOrder ASC
+//              LIMIT 2`,
+//                 [activityId, currentSegmentOrder, skipUserId]
+//             );
+
+//             if (nextSegmentRecords.length > 0) {
+//                 for (let record of nextSegmentRecords) {
+//                     await db.query(
+//                         `UPDATE TBL_ACTIVITY_SEGMENT_RECORD 
+//                      SET status = 'running', actualStartTime = NOW(), udatetime = NOW()
+//                      WHERE recordId = ?`,
+//                         [record.recordId]
+//                     );
+//                 }
+//             }
+//         }
+
+//         res.json({
+//             result: "success",
+//             msg: `${skipUserId}님을 스킵했습니다`
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).json({ result: "fail", msg: "스킵 실패", error: error.message });
+//     }
+// });
 // 取消活动（队长）
 router.post("/activity/:activityId/cancel", authMiddleware, async (req, res) => {
     let { activityId } = req.params;

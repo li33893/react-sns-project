@@ -34,11 +34,16 @@ function Register() {
     if (category === 'group') {
       // ⭐ 如果有活动数据，使用活动数据
       if (activityData?.companions && activityData.companions.length > 0) {
-        setCompanions(activityData.companions); // 保持对象格式
+        setCompanions(activityData.companions);
       } else {
-        setCompanions(['김철수', '이영희', '박민수']); // 默认字符串格式
+        // ⭐ 删除 hardcoded，改为空数组
+        setCompanions([]);
       }
+    } else {
+      // ⭐ 非运动类 Feed，清空同伴列表
+      setCompanions([]);
     }
+
     if (category !== 'vent') {
       setIsAnonymous(false);
     }

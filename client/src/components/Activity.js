@@ -12,7 +12,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 import TimerIcon from '@mui/icons-material/Timer';
-import SkipNextIcon from '@mui/icons-material/SkipNext';
+// import SkipNextIcon from '@mui/icons-material/SkipNext';
 import CancelIcon from '@mui/icons-material/Cancel';
 import PeopleIcon from '@mui/icons-material/People';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -25,8 +25,8 @@ function Activity() {
   const [activity, setActivity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [skipDialogOpen, setSkipDialogOpen] = useState(false);
-  const [skipUserId, setSkipUserId] = useState('');
+  // const [skipDialogOpen, setSkipDialogOpen] = useState(false);
+  // const [skipUserId, setSkipUserId] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -71,8 +71,25 @@ function Activity() {
       });
   };
 
+  // 1️⃣ 修改 handleRelay 函数（添加队长代替的警告）
   const handleRelay = () => {
-    if (!window.confirm('다음 구간으로 릴레이하시겠습니까?')) return;
+    // 判断是否是队长代替
+    const isLeaderReplacing = isLeader && !isCurrentRunner;
+
+    // ⭐ 如果是队长代替，显示警告确认
+    if (isLeaderReplacing) {
+      const currentRunnerNames = runningRecords.map(r => r.nickname).join(', ');
+      const confirmMsg = `⚠️ 경고: ${currentRunnerNames}님을 스킵하고 다음 구간으로 넘어갑니다.\n\n이 작업은 해당 주자의 완료율을 낮춥니다.\n\n계속하시겠습니까?`;
+
+      if (!window.confirm(confirmMsg)) {
+        return;
+      }
+    } else {
+      // 普通确认
+      if (!window.confirm('다음 구간으로 릴레이하시겠습니까?')) {
+        return;
+      }
+    }
 
     fetch(`http://localhost:3010/group/activity/${activity.activityId}/relay`, {
       method: 'POST',
@@ -80,15 +97,20 @@ function Activity() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         operatorId: currentUserId
       })
     })
       .then(res => res.json())
       .then(data => {
         if (data.result === 'success') {
-          alert(data.msg);
-          
+          // ⭐ 根据是否跳过显示不同的提示
+          if (data.wasSkipped) {
+            alert(`⚠️ ${data.msg}\n해당 주자의 완료율이 감소했습니다.`);
+          } else {
+            alert(data.msg);
+          }
+
           if (data.isCompleted) {
             navigate(`/group/${groupId}`);
           } else {
@@ -104,38 +126,38 @@ function Activity() {
       });
   };
 
-  const handleSkipClick = (userId) => {
-    setSkipUserId(userId);
-    setSkipDialogOpen(true);
-  };
+  // const handleSkipClick = (userId) => {
+  //   setSkipUserId(userId);
+  //   setSkipDialogOpen(true);
+  // };
 
-  const handleSkipConfirm = () => {
-    fetch(`http://localhost:3010/group/activity/${activity.activityId}/skip`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({ 
-        userId: currentUserId,
-        skipUserId: skipUserId
-      })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.result === 'success') {
-          alert(data.msg);
-          setSkipDialogOpen(false);
-          fetchActivity(currentUserId);
-        } else {
-          alert(data.msg);
-        }
-      })
-      .catch(err => {
-        console.error('Skip failed:', err);
-        alert('스킵 실패');
-      });
-  };
+  // const handleSkipConfirm = () => {
+  //   fetch(`http://localhost:3010/group/activity/${activity.activityId}/skip`, {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'Authorization': `Bearer ${localStorage.getItem('token')}`
+  //     },
+  //     body: JSON.stringify({ 
+  //       userId: currentUserId,
+  //       skipUserId: skipUserId
+  //     })
+  //   })
+  //     .then(res => res.json())
+  //     .then(data => {
+  //       if (data.result === 'success') {
+  //         alert(data.msg);
+  //         setSkipDialogOpen(false);
+  //         fetchActivity(currentUserId);
+  //       } else {
+  //         alert(data.msg);
+  //       }
+  //     })
+  //     .catch(err => {
+  //       console.error('Skip failed:', err);
+  //       alert('스킵 실패');
+  //     });
+  // };
 
   const handleCancelActivity = () => {
     if (!window.confirm('정말 이 활동을 취소하시겠습니까?')) return;
@@ -171,8 +193,8 @@ function Activity() {
         return <DirectionsRunIcon sx={{ color: '#2196F3' }} />;
       case 'overtime':
         return <CheckCircleIcon sx={{ color: '#FF9800' }} />;
-      case 'skipped':
-        return <SkipNextIcon sx={{ color: '#9E9E9E' }} />;
+      // case 'skipped':
+      //   return <SkipNextIcon sx={{ color: '#9E9E9E' }} />;
       default:
         return <HourglassEmptyIcon sx={{ color: '#9E9E9E' }} />;
     }
@@ -291,7 +313,7 @@ function Activity() {
     if (isLastSegment) {
       return '활동 완료하기';
     }
-    
+
     if (nextMainRunner) {
       // 检查下一段的主跑者是否就是当前的主跑者（最后一人继续的情况）
       const currentMainRunner = runningRecords.find(r => r.role === 'main_runner');
@@ -300,7 +322,7 @@ function Activity() {
       }
       return `${nextMainRunner.nickname}님에게 릴레이`;
     }
-    
+
     return '다음 구간으로';
   };
 
@@ -420,14 +442,14 @@ function Activity() {
                             <Typography variant="body1" sx={{ fontWeight: 600 }}>
                               {record.nickname}
                             </Typography>
-                            <Chip 
-                              label={getRoleLabel(record.role)} 
-                              size="small" 
-                              sx={{ 
-                                height: 20, 
-                                bgcolor: record.role === 'main_runner' ? '#2196F3' : '#96ACC1', 
-                                color: '#fff' 
-                              }} 
+                            <Chip
+                              label={getRoleLabel(record.role)}
+                              size="small"
+                              sx={{
+                                height: 20,
+                                bgcolor: record.role === 'main_runner' ? '#2196F3' : '#96ACC1',
+                                color: '#fff'
+                              }}
                             />
                           </Box>
                           <Typography variant="caption" sx={{ color: '#666' }}>
@@ -447,7 +469,7 @@ function Activity() {
                       </Box>
 
                       {/* 队长可以跳过 */}
-                      {isLeader && record.userId !== currentUserId && (
+                      {/* {isLeader && record.userId !== currentUserId && (
                         <IconButton 
                           size="small" 
                           onClick={() => handleSkipClick(record.userId)}
@@ -455,7 +477,7 @@ function Activity() {
                         >
                           <SkipNextIcon />
                         </IconButton>
-                      )}
+                      )} */}
                     </Box>
                   </Box>
                 ))}
@@ -466,7 +488,7 @@ function Activity() {
                 <Alert severity="info" sx={{ mb: 2, borderRadius: '12px' }}>
                   <Typography variant="body2">
                     <strong>다음 주자:</strong> {nextMainRunner.nickname}님
-                    {nextSegment.runners.length > 1 && 
+                    {nextSegment.runners.length > 1 &&
                       ` (${nextSegment.runners.find(r => r.role === 'companion')?.nickname}님과 함께)`
                     }
                   </Typography>
@@ -480,7 +502,7 @@ function Activity() {
                   {runningRecords.length > 1 && ' 동행자가 함께 달리고 있습니다.'}
                 </Alert>
               )}
-              
+
               {runningRecords.find(r => r.userId === currentUserId && r.role === 'companion') && (
                 <Alert severity="info" icon={<PeopleIcon />} sx={{ mb: 2, borderRadius: '12px' }}>
                   당신은 이 구간의 <strong>동행자</strong>입니다. 주자를 응원하며 함께 달려주세요!
@@ -496,18 +518,41 @@ function Activity() {
                   startIcon={getRelayButtonIcon()}
                   onClick={handleRelay}
                   sx={{
-                    bgcolor: isLastSegment ? '#4CAF50' : '#2196F3',
+                    // ⭐ 如果是队长代替，按钮显示为警告色
+                    bgcolor: isLeader && !isCurrentRunner ? '#FF9800' :
+                      isLastSegment ? '#4CAF50' : '#2196F3',
                     py: 1.5,
                     borderRadius: '12px',
                     fontWeight: 600,
                     fontSize: '16px',
-                    '&:hover': { bgcolor: isLastSegment ? '#45A049' : '#1976D2' }
+                    '&:hover': {
+                      bgcolor: isLeader && !isCurrentRunner ? '#F57C00' :
+                        isLastSegment ? '#45A049' : '#1976D2'
+                    }
                   }}
                 >
-                  {getRelayButtonText()}
-                  {!isLeader && isCurrentRunner && ' (주자/동행자 완료)'}
-                  {isLeader && !isCurrentRunner && ' (팀장 권한)'}
+                  {/* ⭐ 根据角色显示不同文案 */}
+                  {isLeader && !isCurrentRunner ? (
+                    <>
+                      ⚠️ 현재 주자 스킵하고 {getRelayButtonText()}
+                    </>
+                  ) : (
+                    <>
+                      {getRelayButtonText()}
+                    </>
+                  )}
                 </Button>
+              )}
+
+              {isLeader && !isCurrentRunner && canRelay && (
+                <Alert severity="warning" sx={{ mt: 2, borderRadius: '12px' }}>
+                  <strong>팀장 권한으로 릴레이</strong>
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    버튼을 누르면 현재 주자({runningRecords.map(r => r.nickname).join(', ')})를
+                    <strong> 스킵</strong>하고 다음 구간으로 넘어갑니다.
+                    이는 해당 주자의 <strong>완료율을 낮춥니다</strong>.
+                  </Typography>
+                </Alert>
               )}
 
               {!canRelay && activity.userStatus.isParticipant && (
@@ -548,17 +593,17 @@ function Activity() {
                           {segment.segmentName}
                         </Typography>
                         {anyRunning && (
-                          <Chip 
-                            label="진행 중" 
-                            size="small" 
-                            sx={{ bgcolor: '#2196F3', color: '#fff' }} 
+                          <Chip
+                            label="진행 중"
+                            size="small"
+                            sx={{ bgcolor: '#2196F3', color: '#fff' }}
                           />
                         )}
                         {allCompleted && (
-                          <Chip 
-                            label="완료" 
-                            size="small" 
-                            sx={{ bgcolor: '#4CAF50', color: '#fff' }} 
+                          <Chip
+                            label="완료"
+                            size="small"
+                            sx={{ bgcolor: '#4CAF50', color: '#fff' }}
                           />
                         )}
                       </Box>
@@ -570,13 +615,13 @@ function Activity() {
                       {/* 该段的跑步者（1-2人） */}
                       <Box sx={{ width: '100%' }}>
                         {segment.runners.map((record, runnerIndex) => (
-                          <Box 
+                          <Box
                             key={record.recordId}
-                            sx={{ 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              p: 1, 
-                              bgcolor: '#fff', 
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              p: 1,
+                              bgcolor: '#fff',
                               borderRadius: '8px',
                               mb: runnerIndex < segment.runners.length - 1 ? 1 : 0
                             }}
@@ -598,15 +643,15 @@ function Activity() {
                                   <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                     {record.nickname}
                                   </Typography>
-                                  <Chip 
-                                    label={getRoleLabel(record.role)} 
-                                    size="small" 
-                                    sx={{ 
-                                      height: 18, 
+                                  <Chip
+                                    label={getRoleLabel(record.role)}
+                                    size="small"
+                                    sx={{
+                                      height: 18,
                                       fontSize: '10px',
                                       bgcolor: record.role === 'main_runner' ? '#E3F2FD' : '#F5F5F5',
                                       color: record.role === 'main_runner' ? '#2196F3' : '#666'
-                                    }} 
+                                    }}
                                   />
                                 </Box>
                               }
@@ -658,7 +703,7 @@ function Activity() {
         )}
       </Box>
 
-      {/* 跳过确认对话框 */}
+      {/* 跳过确认对话框
       <Dialog open={skipDialogOpen} onClose={() => setSkipDialogOpen(false)}>
         <DialogTitle>주자 스킵</DialogTitle>
         <DialogContent>
@@ -672,7 +717,7 @@ function Activity() {
             스킵
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
     </Box>
   );
 }

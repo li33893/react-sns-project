@@ -79,6 +79,18 @@ router.get("/", async (req, res) => {
             params.push(userId);
         }
 
+        // ⭐ 队伍动态过滤 - 显示用户所在队伍成员的动态
+        if (filter === 'team' && userId) {
+            sql += ` AND F.userId IN (
+                SELECT DISTINCT tm.userId 
+                FROM TBL_TEAM_MEMBER tm
+                WHERE tm.teamId IN (
+                    SELECT teamId FROM TBL_TEAM_MEMBER WHERE userId = ?
+                )
+            )`;
+            params.push(userId);
+        }
+
         // ⭐ 搜索功能
         if (search && search.trim()) {
             sql += " AND (F.title LIKE ? OR F.content LIKE ?)";
@@ -383,66 +395,126 @@ router.get("/:feedId/comments", async (req, res) => {
     }
 });
 
-// 获取单个Feed详情（用于编辑）
 router.get("/detail/:feedId", async (req, res) => {
-    let { feedId } = req.params;
+  let { feedId } = req.params;
 
-    try {
-        let sql = `
-            SELECT F.*, 
-                   I.imgId, I.fileName, I.filePath, I.is_thumbnail
-            FROM TBL_FEED F
-            LEFT JOIN TBL_FEED_IMG I ON F.feedId = I.feedId
-            WHERE F.feedId = ?
-        `;
-        let [rows] = await db.query(sql, [feedId]);
+  console.log('🔍 查询 Feed 详情, feedId:', feedId); // ⭐ 调试日志
 
-        if (rows.length === 0) {
-            return res.status(404).json({ message: "Feed를 찾을 수 없습니다" });
-        }
+  try {
+    let sql = `
+      SELECT F.*, 
+             I.imgId, I.fileName, I.filePath, I.is_thumbnail
+      FROM TBL_FEED F
+      LEFT JOIN TBL_FEED_IMG I ON F.feedId = I.feedId
+      WHERE F.feedId = ?
+    `;
+    let [rows] = await db.query(sql, [feedId]);
 
-        let feed = {
-            feedId: rows[0].feedId,
-            userId: rows[0].userId,
-            feedType: rows[0].feedType,
-            title: rows[0].title,
-            content: rows[0].content,
-            isAnonymous: rows[0].isAnonymous,
-            groupId: rows[0].groupId,
-            routeId: rows[0].routeId,
-            historyId: rows[0].historyId,
-            location: rows[0].location,
-            images: []
-        };
-
-        // 如果这个 feed 关联了活动，获取同伴信息
-        if (feed.historyId) {
-            let [companions] = await db.query(`
-                SELECT DISTINCT U.userId, U.nickname, U.profileImg
-                FROM TBL_ACTIVITY_SEGMENT_RECORD R
-                LEFT JOIN users_tbl U ON R.userId = U.userId
-                WHERE R.activityId = ? AND R.userId != ?
-            `, [feed.historyId, feed.userId]);
-
-            feed.companions = companions;
-        }
-
-        rows.forEach(row => {
-            if (row.imgId) {
-                feed.images.push({
-                    imgId: row.imgId,
-                    fileName: row.fileName,
-                    filePath: row.filePath,
-                    isThumbnail: row.is_thumbnail
-                });
-            }
-        });
-
-        res.json({ result: "success", feed });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: "Failed to get feed detail", error: error.message });
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Feed를 찾을 수 없습니다" });
     }
+
+    let feed = {
+      feedId: rows[0].feedId,
+      userId: rows[0].userId,
+      feedType: rows[0].feedType,
+      title: rows[0].title,
+      content: rows[0].content,
+      isAnonymous: rows[0].isAnonymous,
+      groupId: rows[0].groupId,
+      routeId: rows[0].routeId,
+      historyId: rows[0].historyId,
+      location: rows[0].location,
+      images: []
+    };
+
+    console.log('📝 Feed 基本信息:', {
+      feedId: feed.feedId,
+      historyId: feed.historyId,
+      userId: feed.userId
+    });
+
+    // ⭐ 如果这个 feed 关联了活动，获取同伴信息
+    if (feed.historyId) {
+      console.log('🔄 开始查询同伴信息...');
+      
+      // ⭐ 查询逻辑：找出和该用户在同一段跑步的所有其他人
+      let companionsSql = `
+        SELECT DISTINCT 
+          U.userId, 
+          U.nickname, 
+          U.profileImg
+        FROM TBL_ACTIVITY_SEGMENT_RECORD R1
+        INNER JOIN TBL_ACTIVITY_SEGMENT_RECORD R2 
+          ON R1.activityId = R2.activityId 
+          AND R1.segmentId = R2.segmentId
+          AND R2.userId != ?
+        LEFT JOIN users_tbl U ON R2.userId = U.userId
+        WHERE R1.activityId = ? 
+          AND R1.userId = ?
+        ORDER BY U.nickname ASC
+      `;
+      
+      let [companions] = await db.query(companionsSql, [
+        feed.userId,      // 排除自己
+        feed.historyId,   // 活动ID
+        feed.userId       // 当前用户
+      ]);
+
+      console.log('✅ 查询到的同伴数量:', companions.length);
+      if (companions.length > 0) {
+        console.log('👥 同伴列表:', companions.map(c => c.nickname).join(', '));
+      } else {
+        console.log('⚠️  没有找到同伴！');
+        
+        // 调试：查看该用户在活动中的记录
+        let [userRecords] = await db.query(`
+          SELECT R.recordId, R.segmentId, S.segmentName, R.role
+          FROM TBL_ACTIVITY_SEGMENT_RECORD R
+          LEFT JOIN TBL_ROUTE_SEGMENT S ON R.segmentId = S.segmentId
+          WHERE R.activityId = ? AND R.userId = ?
+        `, [feed.historyId, feed.userId]);
+        
+        console.log('📊 该用户的段记录:', userRecords);
+        
+        // 如果该用户有记录，查看同一段的其他人
+        if (userRecords.length > 0) {
+          let firstSegmentId = userRecords[0].segmentId;
+          let [sameSegmentUsers] = await db.query(`
+            SELECT R.userId, U.nickname, R.role
+            FROM TBL_ACTIVITY_SEGMENT_RECORD R
+            LEFT JOIN users_tbl U ON R.userId = U.userId
+            WHERE R.activityId = ? AND R.segmentId = ?
+          `, [feed.historyId, firstSegmentId]);
+          
+          console.log(`📍 段 ${firstSegmentId} 的所有人:`, sameSegmentUsers);
+        }
+      }
+
+      feed.companions = companions;
+    } else {
+      console.log('ℹ️  这个 Feed 没有关联活动（historyId 为 null）');
+    }
+
+    // 组装图片列表
+    rows.forEach(row => {
+      if (row.imgId) {
+        feed.images.push({
+          imgId: row.imgId,
+          fileName: row.fileName,
+          filePath: row.filePath,
+          isThumbnail: row.is_thumbnail
+        });
+      }
+    });
+
+    console.log('✅ 返回 Feed 数据，同伴数量:', feed.companions?.length || 0);
+    res.json({ result: "success", feed });
+    
+  } catch (error) {
+    console.log('❌ 查询出错:', error);
+    res.status(500).json({ message: "Failed to get feed detail", error: error.message });
+  }
 });
 
 // 修改Feed

@@ -97,31 +97,38 @@ function Feed() {
   };
 
   const handleClickOpen = (feed) => {
-    // ⭐ 如果这个 feed 有 historyId，先获取完整详情（包括同伴信息）
-    if (feed.historyId) {
-      fetch(`http://localhost:3010/feed/detail/${feed.feedId}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.result === 'success') {
-            setSelectedFeed(data.feed);
-          } else {
-            setSelectedFeed(feed);
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          setSelectedFeed(feed);
-        });
-    } else {
+  console.log('🔍 点击的 Feed:', feed);  // ⭐ 调试日志
+  console.log('📋 historyId:', feed.historyId);
+  console.log('📋 feedType:', feed.feedType);
+  
+  // ⭐ 修改：总是调用 detail API 获取完整数据（包括同伴信息）
+  fetch(`http://localhost:3010/feed/detail/${feed.feedId}`)
+    .then(res => res.json())
+    .then(data => {
+      console.log('✅ 收到详情数据:', data);  // ⭐ 调试日志
+      
+      if (data.result === 'success') {
+        console.log('👥 同伴数量:', data.feed.companions?.length || 0);
+        if (data.feed.companions && data.feed.companions.length > 0) {
+          console.log('👥 同伴列表:', data.feed.companions.map(c => c.nickname).join(', '));
+        }
+        setSelectedFeed(data.feed);
+      } else {
+        console.log('⚠️  API 返回失败，使用列表数据');
+        setSelectedFeed(feed);
+      }
+    })
+    .catch(err => {
+      console.error('❌ 获取详情失败:', err);
       setSelectedFeed(feed);
-    }
+    });
 
-    setOpen(true);
-    setCurrentImageIndex(0);
-    fetchComments(feed.feedId);
-    setNewComment('');
-    setReplyToUser(null);
-  };
+  setOpen(true);
+  setCurrentImageIndex(0);
+  fetchComments(feed.feedId);
+  setNewComment('');
+  setReplyToUser(null);
+};
 
   const handleClose = () => {
     setOpen(false);
@@ -334,18 +341,15 @@ function Feed() {
         </Box>
 
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Chip
+           <Chip
             label="팀 동태"
             onClick={() => setFilter('team')}
             size="small"
-            disabled
             sx={{
               bgcolor: filter === 'team' ? '#96ACC1' : '#fff',
-              color: filter === 'team' ? '#fff' : '#999',
-              '&.Mui-disabled': {
-                bgcolor: '#f5f5f5',
-                color: '#ccc'
-              }
+              color: filter === 'team' ? '#fff' : '#666',
+              fontWeight: 500,
+              '&:hover': { bgcolor: filter === 'team' ? '#7A94A8' : '#f5f5f5' }
             }}
           />
           <Chip

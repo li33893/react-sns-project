@@ -92,6 +92,27 @@ function ActivityHistory() {
     return role === 'main_runner' ? '주자' : '동행자';
   };
 
+  // 1️⃣ 添加一个获取状态标签的函数（添加到 getRoleLabel 函数后面）
+  const getStatusLabel = (record) => {
+    if (record.status === 'skipped') {
+      return '미완료';  // 未完成
+    } else if (record.status === 'completed') {
+      return record.isOnTime ? '정시 완료' : '지연 완료';
+    } else {
+      return record.status;  // 其他状态
+    }
+  };
+
+  const getStatusColor = (record) => {
+    if (record.status === 'skipped') {
+      return '#F44336';  // 红色 - 未完成
+    } else if (record.status === 'completed') {
+      return record.isOnTime ? '#4CAF50' : '#FF9800';  // 绿色/橙色
+    } else {
+      return '#9E9E9E';  // 灰色
+    }
+  };
+
   return (
     <Box sx={{ bgcolor: '#E2E2E2', minHeight: '100vh', pb: 4 }}>
       {/* 顶部工具栏 */}
@@ -221,20 +242,36 @@ function ActivityHistory() {
                                       color: '#fff'
                                     }}
                                   />
-                                  {record.isOnTime && (
+
+                                  {/* ⭐ 修复：skipped 状态优先判断，避免重复显示 */}
+                                  {record.status === 'skipped' ? (
+                                    <Chip
+                                      label="미완료"
+                                      size="small"
+                                      sx={{
+                                        height: 20,
+                                        bgcolor: '#FFEBEE',
+                                        color: '#F44336',
+                                        fontWeight: 600
+                                      }}
+                                    />
+                                  ) : record.status === 'completed' && record.isOnTime ? (
                                     <CheckCircleIcon sx={{ fontSize: 20, color: '#4CAF50' }} />
-                                  )}
+                                  ) : record.status === 'completed' && !record.isOnTime ? (
+                                    <Chip
+                                      label="지연 완료"
+                                      size="small"
+                                      sx={{
+                                        height: 20,
+                                        bgcolor: '#FFF3E0',
+                                        color: '#FF9800',
+                                        fontWeight: 600
+                                      }}
+                                    />
+                                  ) : null}
                                 </Box>
                                 <Typography variant="caption" sx={{ color: '#666' }}>
                                   {record.startPoint} → {record.endPoint}
-                                </Typography>
-                              </Box>
-                              <Box sx={{ textAlign: 'right' }}>
-                                <Typography variant="body2" sx={{ fontWeight: 600, color: record.isOnTime ? '#4CAF50' : '#FF9800' }}>
-                                  {record.actualDuration}분
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: '#666' }}>
-                                  {record.isOnTime ? '정시 완료' : '지연 완료'}
                                 </Typography>
                               </Box>
                             </Box>

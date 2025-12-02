@@ -4,6 +4,7 @@ import {
   CardMedia, CardContent, Dialog, DialogTitle, DialogContent,
   DialogActions, TextField, Button, Menu, MenuItem, List, ListItem,
   ListItemAvatar, ListItemText, Divider, Chip, ListItemButton  // ⭐ 添加这个
+  , InputAdornment
 } from '@mui/material';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate, useParams } from 'react-router-dom';
@@ -20,6 +21,11 @@ import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MessageIcon from '@mui/icons-material/Message';
 import PeopleIcon from '@mui/icons-material/People';
+import { useDaumPostcodePopup } from 'react-daum-postcode';
+
+
+
+
 
 function MyPage() {
   const { userId: profileUserId } = useParams();
@@ -52,6 +58,20 @@ function MyPage() {
   const [myGroups, setMyGroups] = useState([]);
   const [joinedGroups, setJoinedGroups] = useState([]); // ⭐ 新增
   const [creatingChat, setCreatingChat] = useState(false);
+
+  const open = useDaumPostcodePopup();
+
+  const handleAddressSearch = () => {
+    open({
+      onComplete: (data) => {
+        setEditForm(prev => ({
+          ...prev,
+          addr: data.address
+        }));
+      },
+    });
+  };
+
 
   const navigate = useNavigate();
 
@@ -559,6 +579,31 @@ function MyPage() {
                 </Typography>
               </Box>
             </Grid>
+            {isOwnProfile && (
+              <Grid item xs={12}>
+                <Box
+                  sx={{
+                    textAlign: 'center',
+                    p: 2.5,
+                    bgcolor: '#F5F8FA',
+                    borderRadius: '12px',
+                    border: '2px solid #96ACC1',
+                    mt: 1
+                  }}
+                >
+                  <Typography variant="h3" sx={{ fontWeight: 700, color: '#96ACC1', mb: 0.5 }}>
+                    {user?.completionRate != null
+                      ? `${typeof user.completionRate === 'number'
+                        ? user.completionRate.toFixed(1)
+                        : parseFloat(user.completionRate || 0).toFixed(1)}%`
+                      : '100.0%'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#666', fontWeight: 500 }}>
+                     활동 완료율
+                  </Typography>
+                </Box>
+              </Grid>
+            )}
           </Grid>
         </Box>
       </Box>
@@ -929,8 +974,19 @@ function MyPage() {
             fullWidth
             margin="normal"
             value={editForm.addr}
-            onChange={(e) => setEditForm({ ...editForm, addr: e.target.value })}
+            InputProps={{
+              readOnly: true,
+              endAdornment: (
+                <InputAdornment position="end">
+                  <Button variant="outlined" size="small" onClick={handleAddressSearch}>
+                    주소검색
+                  </Button>
+                </InputAdornment>
+              )
+            }}
           />
+
+
           <TextField
             label="기저질환"
             fullWidth
