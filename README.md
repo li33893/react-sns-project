@@ -134,11 +134,13 @@ skip된 사람은 시간내에 달리지 못한 사람과 마찬가지로 달리
 
 ---
 
-## 개인 마페이지
+### 개인 마페이지
 <p align="center">
        <img src="./img/profile.png" alt="프로파일" width="500" />
 </p>
-### 1. 팔로잉 & 팔로워 & 챗
+
+#### 1. 팔로잉 & 팔로워 & 챗
+
 개인이 타인의 마이페이지에 접근시 오른쪽에 팔로우와 챗 버턴이 보입니다.
 <p align="center">
        <img src="./img/beforefollowandchat.png" alt="프로파일" width="500" />
