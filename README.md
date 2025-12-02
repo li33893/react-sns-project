@@ -69,10 +69,10 @@
 
 팀장은 신청서를 검토하여 승인 또는 거절합니다. 승인 전 상태는 '검토 중'이며, 승인되면 해당 인원이 팀에 합류합니다. 거절 시 거절 사유가 전송됩니다. 
  <p align="center">
-       <img src="./img/appdadmin1.png" alt="팀 승인1" width="400" /> 
+       <img src="./img/appadmin1.png" alt="팀 승인1" width="400" /> 
 </p>
 <p align="center">
-       <img src="./img/appdadmin2.png" alt="팀 승인2" width="400" />
+       <img src="./img/appadmin2.png" alt="팀 승인2" width="400" />
 </p>
 
 
