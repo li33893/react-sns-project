@@ -6,7 +6,7 @@
 ---
 #### 1.로그인 화면
 <p align="center">
-   <img src="./img/login.png" alt="로그인" width="300" style="display:block; margin:auto"/>
+   <img src="./img/login.png" alt="로그인" width="500" style="display:block; margin:auto"/>
 </p>
 
 #### 2. 회원가입 화면
