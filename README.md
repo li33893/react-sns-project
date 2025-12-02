@@ -223,10 +223,42 @@ skip된 사람은 시간내에 달리지 못한 사람과 마찬가지로 달리
        <img src="./img/profileedit.png" alt="프로파일" width="500" />
 </p>
 
+<p align="center">
+       <img src="./img/profileedit.png" alt="프로파일" width="500" />
+</p>
+
 
 
 ### SNS 공유 노트 (홈페이지/메인 피드)
 
+
+<p align="center">
+       <img src="./img/feeddetail.png" alt="피드 세부" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/acting.png" alt="활동중" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/newnoti1.png" alt="알림1" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/newnoti2.png" alt="알림2" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/runfeedbefore.png" alt="운동피드 작성 전" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/ventfeed1.png" alt="발산피드 작성 중" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/ventfeed2.png" alt="발산피드 작성 " width="500" />
+</p>
 홈페이지의 주요 기능은 두 가지입니다: 첫째는 팀 구성 기능, 둘째는 노트 자유롭게 탐색 기능입니다.
 
 1. **노트 목록 검색 및 필터링:**  
