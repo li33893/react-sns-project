@@ -156,6 +156,11 @@ skip된 사람은 시간내에 달리지 못한 사람과 마찬가지로 달리
        <img src="./img/afterchat.png" alt="프로파일" width="500" />
 </p>
 
+#### 2. 프로파일 수정
+<p align="center">
+       <img src="./img/profileedit.png" alt="프로파일" width="500" />
+</p>
+
 
 
 ### SNS 공유 노트 (홈페이지/메인 피드)
