@@ -7,7 +7,8 @@
 #### 1.1 로그인 화면
 <img src="./img/login.png" alt="로그인" width="300"/>
 
-
+#### 1.2 회원가입 화면
+<img src="./img/signup.png" alt="회원가입" width="200" height="600"/>
 
 ### 2. 팀 구성
 ---
