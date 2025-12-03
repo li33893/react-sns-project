@@ -213,7 +213,7 @@
 #### 로그인
 
 <p align="center">
-   <img src="./img/login.png" alt="로그인" width="400"/>
+   <img src="./img/login1.png" alt="로그인" width="400"/>
 </p>
 
 #### 회원가입
