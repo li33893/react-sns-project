@@ -1,18 +1,103 @@
 # 🟦🌧️ Sweatin'SkyBlue
 
+<sub>"우울증은 구름일 수 있지만, 당신은 하늘입니다."</sub>
+<br>
+<sub>"구름이 하늘을 지배하는 것처럼 보일 때도, 하늘은 여전히 하늘로 남아 있습니다. 구름은 결국 흘러가지만 하늘은 그 자리에 있습니다. 당신이 우울증보다 크다는 것, 그것이 당신 안에서 작동할 뿐 당신이 그 안에서 작동하는 것이 아니라는 것"</sub>
+<br>
+<sub>뛰며 땀으로 구름을 걷어내는 뜻으로 이 이름을 지었습니다.</sub>
+
+
+## 🔧 사용 기술
+
+**개발 기간**: 2025.11.25 ~ 2025.12.02 (8일)
+
+---
+
+### Frontend
+
+| 기술명 | 설명 |
+|--------|------|
+| ![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react&logoColor=white) | React 18.3.1 - 최신 React 기능을 활용한 컴포넌트 기반 개발 |
+| ![Material-UI](https://img.shields.io/badge/Material--UI-6.1.5-007FFF?logo=mui&logoColor=white) | Material-UI 6.1.5 - 일관된 UI 컴포넌트 라이브러리 |
+| ![React Router](https://img.shields.io/badge/React_Router-6.27.0-CA4245?logo=react-router&logoColor=white) | React Router 6.27.0 - 클라이언트 사이드 라우팅 |
+| ![Socket.io-Client](https://img.shields.io/badge/Socket.io--Client-4.8.1-010101?logo=socket.io&logoColor=white) | Socket.io-client 4.8.1 - 실시간 채팅 WebSocket 클라이언트 |
+| ![JWT Decode](https://img.shields.io/badge/JWT_Decode-4.0.0-000000?logo=jsonwebtokens&logoColor=white) | jwt-decode 4.0.0 - JWT 토큰 디코딩 |
+
+---
+
+### Backend
+
+| 기술명 | 설명 |
+|--------|------|
+| ![Node.js](https://img.shields.io/badge/Node.js-24.11.1-339933?logo=node.js&logoColor=white) | Node.js 24.11.1 - 비동기 이벤트 기반 서버 런타임 |
+| ![Express](https://img.shields.io/badge/Express-5.1.0-000000?logo=express&logoColor=white) | Express 5.1.0 - 간결한 웹 프레임워크 |
+| ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white) | MySQL 8.0 - 관계형 데이터베이스 |
+| ![Socket.io](https://img.shields.io/badge/Socket.io-4.7.2-010101?logo=socket.io&logoColor=white) | Socket.io 4.7.2 - 실시간 채팅 WebSocket 서버 |
+| ![JWT](https://img.shields.io/badge/JWT-9.0.2-000000?logo=jsonwebtokens&logoColor=white) | JWT 9.0.2 - 토큰 기반 인증 |
+| ![bcrypt](https://img.shields.io/badge/bcrypt-6.0.0-338033?logo=letsencrypt&logoColor=white) | bcrypt 6.0.0 - 비밀번호 해싱 (saltRounds: 10) |
+| ![Multer](https://img.shields.io/badge/Multer-2.0.2-FF6600?logo=files&logoColor=white) | Multer 2.0.2 - 파일 업로드 처리 |
+
+---
+
+### 외부 API
+
+| 기술명 | 설명 |
+|--------|------|
+| ![Daum Postcode](https://img.shields.io/badge/Daum_Postcode-API-FFCD00?logo=kakao&logoColor=black) | Daum 우편번호 API - 주소 검색 서비스 |
+
+---
+
+## 🏗️ 주요 기능별 기술 스택
+
+### 실시간 채팅
+- **Frontend**: Socket.io-client 4.8.1
+- **Backend**: Socket.io 4.7.2
+- **특징**: WebSocket 기반 실시간 양방향 통신
+
+### 인증 시스템
+- **암호화**: bcrypt 6.0.0 (saltRounds: 10)
+- **토큰**: JWT 9.0.2
+- **유효기간**: 1시간
+
+### 파일 업로드
+- **라이브러리**: Multer 2.0.2
+- **지원 파일**: 프로필 이미지, 피드 이미지 (최대 9장), 채팅 이미지
+- **저장 위치**: 로컬 서버 `uploads/` 디렉토리
+
+### 주소 검색
+- **API**: Daum Postcode API
+- **기능**: 도로명 주소 기반 검색 및 자동 완성
+
+## 배경 및 기능 설계
+
+
+| 배경 | 내용 |
+|------|------|
+| **치료 자원 접근성 문제** | **설명**: 가장 치료가 필요한 사람들이 가장 치료받기 어렵습니다. 저소득층은 긴 대기 시간, 높은 비용, 보다 큰 약물 부작용 부담에 직면합니다. 기존 심리치료는 주로 중산층을 위해 설계되었습니다. 운동은 간단하게 보이지만 실은 아주 강력한 항우울 솔루션입니다. 특히 조깅은 강력한 항우울 효과가 있으며 비용이 거의 들지 않습니다. 많은 연구에서 운동을 우울증 핵심 치료법으로 권고합니다.<br><br>**서비스 설계**: 효과적이고 저렴하며 접근 가능한 솔루션 제공<br><br>**기능**: 조깅을 운동 방식으로 선택 (항우울에 가장효과적인 운동중의 하나,간단, 효율적, 햇빛, 저렴, 준비 시간 짧음) |
+| **우울증의 일상생활 침투** | **설명**: 우울증은 행동 능력을 약화시키며 실패는 학습된 무력감을 심화시킵니다. 그러나 우울증은 활용 가능한 "자원"도 제공합니다: 조기 기상은 활용 가능한 시간을 만들고, 일부 "부정적 인지"는 오히려 동기로 전환될 수 있습니다.<br><br>**서비스 설계**: <br>• 우울증 환자의 특성에 맞춰 개인의 심리적 투여를 최소화<br>• 정상적인 생활을 방해하지 않음<br><br>**기능**: 릴레이 조깅 형식 (이전 주자가 도착해야 다음 주자가 달릴 수 있어 일정한 강제성 제공, 탈락 방지) |
+| **과도한 의료화와 낙인** | **설명**: 환자들은 "왜 이렇게 되었는가"에만 초점을 맞추고 "당신은 누구인가", "무엇을 할 수 있는가"는 무시됩니다. 낙인 두려움으로 도움을 구하지 못하고, 정상인에게 쉬운 사회적 교류가 큰 압박이 됩니다. 또한 사람은 대부분의 사람들이 인식하는 것보다 훨씬 복잡합니다. 모든 사람은 독특하고 심오한 사고, 욕구, 성격, 행동 패턴 및 활용 가능한 자원을 가지고 있습니다. 오늘날의 사회 구조는 이러한 조건을 갖추지 못한 것으로 보이며, 따라서 환자의 진정한 행동력을 이끌어내기 어렵습니다.이러한 상황에서 환자를 진정으로 돕기 위해서는 인간의 복잡성을 충분히 받아들여야 하며, 따라서 환자의 주도성을 높이는 것이 핵심일 것입니다. <br><br>**서비스 설계**: <br>• 비슷한 경험을 가진 사람들을 모아 심리적 부담 감소<br>• 부정적 감정과 행동을 수용할 수 있는 공간 제공<br>• 자연스러운 조건에서 사회 활동 제공 (사회적 교류가 주목적 아님)<br>• 인지적 부담 감소, 충분한 선택의 자유 제공<br><br>**기능**: <br>• 기본 팀 구성 및 게시 기능 (같은 지역 거주자끼리 팀 구성)<br>• 익명 트리홀 기능<br>• 릴레이 중 동료 동행 제공, 기본 팀 채팅 기능<br>• 어떠한 인지적/이념적 틀도 제공하지 않음 |
+
+---
+
+## 핵심 원칙
+✅ 효과적이고 저렴하며 접근 가능  
+✅ 정상적인 생활을 방해하지 않음  
+✅ 환자 특성에 맞춤  
+✅ 선택의 자유와 자율성 존중
+
 ## 기능 소개
 
 ### 로그인 & 회원가입
 ---
 #### 1.로그인 화면
 <p align="center">
-   <img src="./img/login.png" alt="로그인" width="300" style="display:block; margin:auto"/>
+   <img src="./img/login.png" alt="로그인" width="400" style="display:block; margin:auto"/>
 </p>
 
 #### 2. 회원가입 화면
 - **공병/기저질환**:주요 목적은 달리기에 적합하지 않은 사람과 일정 계획에서 문제가 있을 수 있는 사람을 팀장이 참고할 수 있도록 선별하는 것입니다.
 <p align="center">
-  <img src="./img/signup.png" alt="회원가입" width="200" height="600" />
+  <img src="./img/signup.png" alt="회원가입" width="400" />
 </p>
 
 
@@ -45,13 +130,13 @@
 1.1 **팀장 신청 (팀 생성):**  
    달리기 팀의 팀장 신청은 코스 90% 이상 무결석(신용도 양호) 조건을 충족해야 합니다. 또한 자신이 경로, 강도, 시간을 직접 설계해야 합니다.
    <p align="center">
-       <img src="./img/creategroup1.png" alt="팀생성1" width="400" />
+       <img src="./img/creategroup1.png" alt="팀생성1" width="500" />
    </p>
    <p align="center">
-      <img src="./img/creategroup2.png" alt="팀생성2" width="400" />
+      <img src="./img/creategroup2.png" alt="팀생성2" width="500" />
    </p>
    <p align="center">
-       <img src="./img/creategroup3.png" alt="팀생성3" width="400" />
+       <img src="./img/creategroup3.png" alt="팀생성3" width="500" />
    </p>
    
 1.2  **팀 가입 신청 및 승인:** 
@@ -82,7 +167,7 @@
        <img src="./img/relaystartpage.png" alt="리레이 시작" width="500" />
 </p>
 
-팀장이 시작 버턴을 누르면 릴레이 활동이 정식으로 시작합니다. 팀장이 무조근 제일 먼저 혼자서 달립니다. 
+팀장이 시작 버턴을 누르면 릴레이 활동이 정식으로 시작합니다. 팀장이 무조건 제일 먼저 혼자서 달립니다. 
 <br>
 만약에 "내"가 주자로서 릴레이하면 다음 사람이 주자가되고 "나"는 동반자로 같이 달립니다. 그러다가 시간내에 다다음 사람이 주자가되면 나의 달리기는 끝마칩니다.
 <p align="center">
@@ -113,22 +198,69 @@ skip된 사람은 시간내에 달리지 못한 사람과 마찬가지로 달리
 
 ---
 
-## 개인 홈페이지, SNS 공유 (홈페이지/피드)
+### 개인 마페이지
+<p align="center">
+       <img src="./img/profile.png" alt="프로파일" width="500" />
+</p>
 
-### 개인 홈페이지
+#### 1. 팔로잉 & 팔로워 & 챗
 
-1. **(필수)** 코스 완료율 공개
-2. 공개해도 무방한 기본 정보 및 상태 메시지: 닉네임, 생일, 성별, 나이, 직업 (닉네임 외 정보는 공개하지 않아도 무방)
-3. 내 노트(피드), 북마크한 노트
-4. 친구 목록 (친구 추가, 언팔로우)
-5. 소속 팀
-6. 알림 (채팅 알림, 노트 좋아요/댓글 알림)
-7. 팀장의 경우 추가 항목: 내 팀
+개인이 타인의 마이페이지에 접근시 오른쪽에 팔로우와 챗 버턴이 보입니다.
+<p align="center">
+       <img src="./img/beforefollowandchat.png" alt="프로파일" width="500" />
+</p>
+팔로우하면 해당자리에 숫자가 변합니다.
+<p align="center">
+       <img src="./img/afterfollow.png" alt="프로파일" width="500" />
+</p>
+해당 자리를 누르면 팔로잉/팔로워 리스드가 보입니다.
+!!!!!!!!!!!!!!!
+챗을 누르면 해당 사람과의 채팅방이 생성됩니다 (메뉴바의 "메세지"에서 조회)
+<p align="center">
+       <img src="./img/afterchat.png" alt="프로파일" width="500" />
+</p>
 
-`tbl_feed`, `tbl_feed_img`, `tbl_feed_like`, `tbl_feed_favorite`, `tbl_comment` 와 같은 테이블 구조가 필요합니다.
+#### 2. 프로파일 수정
+<p align="center">
+       <img src="./img/profileedit.png" alt="프로파일" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/profileedit.png" alt="프로파일" width="500" />
+</p>
+
+
 
 ### SNS 공유 노트 (홈페이지/메인 피드)
 
+
+<p align="center">
+       <img src="./img/feeddetail.png" alt="피드 세부" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/acting.png" alt="활동중" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/newnoti1.png" alt="알림1" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/newnoti2.png" alt="알림2" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/runfeedbefore.png" alt="운동피드 작성 전" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/ventfeed1.png" alt="발산피드 작성 중" width="500" />
+</p>
+
+<p align="center">
+       <img src="./img/ventfeed2.png" alt="발산피드 작성 " width="500" />
+</p>
 홈페이지의 주요 기능은 두 가지입니다: 첫째는 팀 구성 기능, 둘째는 노트 자유롭게 탐색 기능입니다.
 
 1. **노트 목록 검색 및 필터링:**  
@@ -150,6 +282,7 @@ skip된 사람은 시간내에 달리지 못한 사람과 마찬가지로 달리
 ---
 
 ## 현재 문제점 (이슈)
+0. 서비스의 로직에서 보면 앱이어야 함...
 
 1. 팀장이 경로, 시간, 멤버를 수정할 수 있는 기능이 없습니다.
 2. 팀원이 팀을 탈퇴할 수 있는 버튼이 없습니다.
