@@ -1180,7 +1180,7 @@ function MyPage() {
                       <Typography variant="body2" sx={{ color: '#666' }}>
                         {comment.replyToNickname && (
                           <Typography component="span" sx={{ color: '#96ACC1', fontWeight: 600, mr: 0.5 }}>
-                            @{comment.replyToNickname}
+                            {/* @{comment.replyToNickname} */}
                           </Typography>
                         )}
                         {comment.content}
