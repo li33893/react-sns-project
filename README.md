@@ -214,7 +214,12 @@ skip된 사람은 시간내에 달리지 못한 사람과 마찬가지로 달리
        <img src="./img/afterfollow.png" alt="프로파일" width="500" />
 </p>
 해당 자리를 누르면 팔로잉/팔로워 리스드가 보입니다.
-!!!!!!!!!!!!!!!
+<p align="center">
+       <img src="./img/following.png" alt="프로파일" width="500" />
+</p>
+<p align="center">
+       <img src="./img/follower.png" alt="프로파일" width="500" />
+</p>
 챗을 누르면 해당 사람과의 채팅방이 생성됩니다 (메뉴바의 "메세지"에서 조회)
 <p align="center">
        <img src="./img/afterchat.png" alt="프로파일" width="500" />
