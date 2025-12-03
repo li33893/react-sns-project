@@ -263,7 +263,7 @@ function GroupDetail() {
                     팀 상세정보
                 </Typography>
 
-                {/* 申请管理按钮 - 只有队长可见 */}
+                {/* 申请管理按钮 - 只有队长可见
                 {group.userStatus.isLeader && (
                     <IconButton
                         onClick={handleViewApplications}
@@ -287,7 +287,7 @@ function GroupDetail() {
                             <AssignmentIcon sx={{ color: pendingApplicationCount > 0 ? '#FF9800' : '#666' }} />
                         </Badge>
                     </IconButton>
-                )}
+                )} */}
             </Box>
 
             <Box sx={{ maxWidth: '1200px', mx: 'auto', p: 3 }}>

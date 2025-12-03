@@ -60,34 +60,58 @@ router.get("/rooms", authMiddleware, async (req, res) => {
                 G.groupName,
                 G.district,
 
-                -- ⭐ 这里正式修复私聊对象信息
-                U.userId            AS otherUserId,
-                U.nickname          AS otherUserNickname,
-                U.profileImg        AS otherUserProfileImg
+                -- ⭐ 只对私聊获取对方信息（使用子查询避免重复）
+                CASE 
+                    WHEN R.roomType = 'private' THEN (
+                        SELECT U2.userId
+                        FROM tbl_chat_member CM2
+                        JOIN users_tbl U2 ON CM2.userId = U2.userId
+                        WHERE CM2.roomId = R.roomId AND CM2.userId != ?
+                        LIMIT 1
+                    )
+                    ELSE NULL
+                END AS otherUserId,
+                
+                CASE 
+                    WHEN R.roomType = 'private' THEN (
+                        SELECT U2.nickname
+                        FROM tbl_chat_member CM2
+                        JOIN users_tbl U2 ON CM2.userId = U2.userId
+                        WHERE CM2.roomId = R.roomId AND CM2.userId != ?
+                        LIMIT 1
+                    )
+                    ELSE NULL
+                END AS otherUserNickname,
+                
+                CASE 
+                    WHEN R.roomType = 'private' THEN (
+                        SELECT U2.profileImg
+                        FROM tbl_chat_member CM2
+                        JOIN users_tbl U2 ON CM2.userId = U2.userId
+                        WHERE CM2.roomId = R.roomId AND CM2.userId != ?
+                        LIMIT 1
+                    )
+                    ELSE NULL
+                END AS otherUserProfileImg
 
             FROM tbl_chat_room R
 
             INNER JOIN tbl_chat_member CM 
-                ON R.roomId = CM.roomId
-
-            -- ⭐ 找到“对方”的成员
-            LEFT JOIN tbl_chat_member CM2 
-                ON CM2.roomId = R.roomId 
-            AND CM2.userId != ?
-
-            -- ⭐ 从 users_tbl 取昵称、头像
-            LEFT JOIN users_tbl U
-                ON U.userId = CM2.userId
+                ON R.roomId = CM.roomId AND CM.userId = ?
 
             LEFT JOIN tbl_group G 
                 ON R.relatedGroupId = G.groupId
 
-            WHERE CM.userId = ?
             ORDER BY lastMessageTime DESC, R.cdatetime DESC
         `;
 
-
-        const [rooms] = await db.query(sql, [userId, userId, userId]);
+        const [rooms] = await db.query(sql, [
+            userId,  // unreadCount
+            userId,  // otherUserId
+            userId,  // otherUserNickname  
+            userId,  // otherUserProfileImg
+            userId   // CM.userId
+        ]);
 
         res.json({
             rooms,
@@ -98,7 +122,6 @@ router.get("/rooms", authMiddleware, async (req, res) => {
         res.status(500).json({ msg: "Failed to get chat rooms" });
     }
 });
-
 
 // 获取特定聊天室详情
 router.get("/rooms/:roomId", authMiddleware, async (req, res) => {

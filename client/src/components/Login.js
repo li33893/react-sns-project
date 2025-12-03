@@ -139,7 +139,7 @@ function Login() {
           회원아니셤? <Link to="/join">회원가입</Link>
         </Typography>
 
-         <Typography
+         {/* <Typography
           variant="body2"
           sx={{
             marginTop: '16px',
@@ -152,8 +152,8 @@ function Login() {
             }
           }}
         >
-          비밀번호를 잊으셨나요? <Link to="/join">비밀번호 재설정하러 가기</Link>
-        </Typography>
+          비밀번호를 잊으셨나요? <Link to="#">비밀번호 재설정하러 가기</Link>
+        </Typography> */}
       </Box>
     </Box>
   );
