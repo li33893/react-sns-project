@@ -85,216 +85,254 @@
 ✅ 환자 특성에 맞춤  
 ✅ 선택의 자유와 자율성 존중
 
-## 기능 소개
+🚀 핵심 기능
+1. 릴레이 조깅 시스템
+🏃 릴레이 방식
 
+이전 주자가 중간 지점 도착 → 다음 주자와 합류 → 릴레이 버튼
+버튼 누르는 순간: 다음 사람 타이머 시작, 두 사람이 함께 달림
+다음 사람이 버튼 누를 때 이전 사람 임무 완료
+
+👥 역할 변화
+
+전반부: 나는 주자, 이전 사람이 동반자
+후반부: 나는 동반자, 다음 사람이 주자
+
+👑 팀장 권한
+
+릴레이 과정 직접 제어
+Skip 기능: 특정 인원 건너뛰어 다음 사람에게 영향 주지 않음
+시간 내 완료 못한 사람 → 완료율 하락
+
+2. 커뮤니티 기능
+📝 피드 (3개 구역)
+
+운동 구역: 달리기 후 운동 기록 공유 (함께 달린 사람 표시)
+일상 구역: 일상 생활 공유
+발산 구역: 익명 트리홀 - 부정적 감정 배출 공간
+
+💬 채팅
+
+팀 채팅: 팀 모집 완료 후 자동 생성
+1:1 채팅: 다른 사용자 프로필에서 메시지 버튼
+
+🔔 알림
+
+좋아요, 댓글, 팔로우 알림
+팀 가입 신청/승인 알림
+릴레이 알림 (당신 차례입니다!)
+
+3. 팀 관리
+팀 생성 (팀장)
+
+조건: 이전 코스 90% 이상 완료율 (신용도 양호)
+설정: 경로, 강도, 시간, 최대 인원 직접 설계
+구간 배정: 각 팀원에게 담당 구간 할당
+
+팀 가입 (팀원)
+
+필터링: 지역(구 단위), 강도별 검색
+신청서: 건강 상태, 직업, 신청 이유, 희망 구간 기재
+승인/거절: 팀장이 검토 후 결정
+
+4. 개인 프로필
+
+팔로우/팔로워 시스템
+완료율 표시 (신용도)
+내 팀 / 가입된 팀 조회
+저장한 피드 모아보기
+
+
+🔧 기술 스택
+Frontend
+기술명설명이미지 표시React 18.3.1 - 최신 React 기능을 활용한 컴포넌트 기반 개발이미지 표시Material-UI 6.1.5 - 일관된 UI 컴포넌트 라이브러리이미지 표시React Router 6.27.0 - 클라이언트 사이드 라우팅이미지 표시Socket.io-client 4.8.1 - 실시간 채팅 WebSocket 클라이언트이미지 표시jwt-decode 4.0.0 - JWT 토큰 디코딩
+Backend
+기술명설명이미지 표시Node.js 24.11.1 - 비동기 이벤트 기반 서버 런타임이미지 표시Express 5.1.0 - 간결한 웹 프레임워크이미지 표시MySQL 8.0 - 관계형 데이터베이스이미지 표시Socket.io 4.7.2 - 실시간 채팅 WebSocket 서버이미지 표시JWT 9.0.2 - 토큰 기반 인증 (유효기간: 1시간)이미지 표시bcrypt 6.0.0 - 비밀번호 해싱 (saltRounds: 10)이미지 표시Multer 2.0.2 - 파일 업로드 처리 (이미지 최대 9장)
+외부 API
+기술명설명이미지 표시Daum 우편번호 API - 주소 검색 서비스
+
+📱 주요 화면
+🔐 인증
+<details>
+<summary><b>로그인 & 회원가입</b></summary>
+로그인
 <p align="center">
-   <img src="./img/home.png" alt="홈" width="600" style="display:block; margin:auto"/>
+   <img src="./img/login.png" alt="로그인" width="400"/>
 </p>
-
-### 로그인 & 회원가입
----
-#### 1.로그인 화면
+회원가입
+공병/기저질환: 달리기에 부적합한 사람 또는 일정 계획 문제 가능성이 있는 사람을 팀장이 참고할 수 있도록 함
 <p align="center">
-   <img src="./img/login.png" alt="로그인" width="400" style="display:block; margin:auto"/>
+  <img src="./img/signup.png" alt="회원가입" width="400"/>
 </p>
+</details>
 
-#### 2. 회원가입 화면
-- **공병/기저질환**:주요 목적은 달리기에 적합하지 않은 사람과 일정 계획에서 문제가 있을 수 있는 사람을 팀장이 참고할 수 있도록 선별하는 것입니다.
+🏃 팀 & 릴레이
+<details>
+<summary><b>1. 팀 생성 (팀장)</b></summary>
+경로 및 설정 디자인
 <p align="center">
-  <img src="./img/signup.png" alt="회원가입" width="400" />
-</p>
-
-
-### 팀 구성
----
-
-#### 1. 🏃‍♀️ 팀 구성 (달리기)
-
-<small>
-
-> **[형식]**
-> 주로 릴레이 방식입니다.
->
-> **[역할]**
-> - 전반부: 자신이 주자, 이전 사람이 동반자  
-> - 후반부: 자신이 동반자, 다음 사람이 주자  
-> - → 각 개인에게 전반부 역할은 주자, 후반부 역할은 동반자임
->
-> **[릴레이 방법]**
-> - 이전 사람이 중간 지점에 도달하면 다음 사람과 합류 → 릴레이 버튼 누름  
-> - 버튼 누르는 순간: 다음 사람 타이머 시작, 이전 사람은 동반자, 다음 사람은 주자가 되어 두 사람이 함께 달림  
-> - → 다음 사람이 버튼 누를 때 이전 사람은 자신의 달리기 임무 완료, 반복
->
-> **[팀장 권한]**
-> - 팀장은 과정을 직접 제어 가능  
-> - 특정 인원을 건너뛰어 다음 사람 달리기에 영향 주지 않도록 설정 가능
-
-</small>
-
-1.1 **팀장 신청 (팀 생성):**  
-   달리기 팀의 팀장 신청은 코스 90% 이상 무결석(신용도 양호) 조건을 충족해야 합니다. 또한 자신이 경로, 강도, 시간을 직접 설계해야 합니다.
-   <p align="center">
-       <img src="./img/creategroup1.png" alt="팀생성1" width="500" />
-   </p>
-   <p align="center">
-      <img src="./img/creategroup2.png" alt="팀생성2" width="500" />
-   </p>
-   <p align="center">
-       <img src="./img/creategroup3.png" alt="팀생성3" width="500" />
-   </p>
-   
-1.2  **팀 가입 신청 및 승인:** 
-메뉴 바의 "팀"에 있으며, 피드와 유사한 인터페이스로, 기본적으로 자택 근처(구 단위)의 팀들이 카드 형태로 표시됩니다. 또한 사용자가 다른 시/구 및 강도를 선택하여 필터링할 수 있는 선택 옵션이 있습니다.
- <p align="center">
-       <img src="./img/teamselection.png" alt="팀선택" width="500" />
-</p>
-클릭하면,팀 상세로 가는데 여기에서 신청하거나 팀장이 신청을 승이/거절할 수 있습니다.
-<p align="center">
-       <img src="./img/teamdetail.png" alt="팀 상세" width="500" />
-</p>
- 신청서 작성시 자신의 건강 상태(특히 동반 질환),  직업, 신청 이유, 희망 달리기 구간을 사실대로 기재합니다.
- <p align="center">
-       <img src="./img/app.png" alt="팀 상세" width="500" />
-</p>
-
-팀장은 신청서를 검토하여 승인 또는 거절합니다. 승인 전 상태는 '검토 중'이며, 승인되면 해당 인원이 팀에 합류합니다. 거절 시 거절 사유가 전송됩니다. 
- <p align="center">
-       <img src="./img/appadmin1.png" alt="팀 승인1" width="500" /> 
-</p>
-<p align="center">
-       <img src="./img/appadmin2.png" alt="팀 승인2" width="500" />
-</p>
-
-1.3 **달리기 과정:** 
-마이페이지-내팀에서 팀을 선택해서 들어갑니다.
-<p align="center">
-       <img src="./img/relaystartpage.png" alt="리레이 시작" width="500" />
-</p>
-
-팀장이 시작 버턴을 누르면 릴레이 활동이 정식으로 시작합니다. 팀장이 무조건 제일 먼저 혼자서 달립니다. 
-<br>
-만약에 "내"가 주자로서 릴레이하면 다음 사람이 주자가되고 "나"는 동반자로 같이 달립니다. 그러다가 시간내에 다다음 사람이 주자가되면 나의 달리기는 끝마칩니다.
-<p align="center">
-       <img src="./img/relayleaderstart.png" alt="정상 릴레이" width="500" />
-</p>
-의도외의 상황(지각, 전에 달리는 사람이 시간내에 다음 사람을 만나지 못함 등)을 방지하기 위하여 팀장은 "skip"기능을 보유됩니다. 
-<p align="center">
-       <img src="./img/skip.png" alt="스킵" width="500" />
-</p>
-skip된 사람은 시간내에 달리지 못한 사람과 마찬가지로 달리기 마치지 못하여 완성율이 떨어집니다.
-<p align="center">
-       <img src="./img/ratedrop.png" alt="스킵" width="400" />
-</p>
-정상적으로 완성될 때와 대비:
-<p align="center">
-       <img src="./img/ratemaintain.png" alt="스킵" width="400" />
-</p>
-
-
-
-#### 2. 채팅 그룹 
-
-채팅 그룹은 다중 사용자 채팅 그룹입니다. 팀 모집이 끝나자마자 나타납니다.
-<p align="center">
-       <img src="./img/groupchat.png" alt="그룹챗" width="500" />
-</p>
-
-
----
-
-### 개인 마페이지
-<p align="center">
-       <img src="./img/profile.png" alt="프로파일" width="500" />
-</p>
-
-#### 1. 팔로잉 & 팔로워 & 챗
-
-개인이 타인의 마이페이지에 접근시 오른쪽에 팔로우와 챗 버턴이 보입니다.
-<p align="center">
-       <img src="./img/beforefollowandchat.png" alt="프로파일" width="500" />
-</p>
-팔로우하면 해당자리에 숫자가 변합니다.
-<p align="center">
-       <img src="./img/afterfollow.png" alt="프로파일" width="500" />
-</p>
-해당 자리를 누르면 팔로잉/팔로워 리스드가 보입니다.
-<p align="center">
-       <img src="./img/following.png" alt="프로파일" width="500" />
+   <img src="./img/creategroup1.png" alt="팀생성1" width="500"/>
 </p>
 <p align="center">
-       <img src="./img/follower.png" alt="프로파일" width="500" />
+   <img src="./img/creategroup2.png" alt="팀생성2" width="500"/>
 </p>
-챗을 누르면 해당 사람과의 채팅방이 생성됩니다 (메뉴바의 "메세지"에서 조회)
 <p align="center">
-       <img src="./img/afterchat.png" alt="프로파일" width="500" />
+   <img src="./img/creategroup3.png" alt="팀생성3" width="500"/>
 </p>
-
-#### 2. 프로파일 수정
+</details>
+<details>
+<summary><b>2. 팀 가입 (팀원)</b></summary>
+팀 선택 화면
+기본적으로 자택 근처(구 단위) 팀 표시, 지역/강도별 필터링 가능
 <p align="center">
-       <img src="./img/profileedit.png" alt="프로파일" width="500" />
+   <img src="./img/teamselection.png" alt="팀선택" width="500"/>
 </p>
+팀 상세 & 신청
+<p align="center">
+   <img src="./img/teamdetail.png" alt="팀 상세" width="500"/>
+</p>
+신청서 작성
+건강 상태, 직업, 신청 이유, 희망 구간 기재
+<p align="center">
+   <img src="./img/app.png" alt="신청서" width="500"/>
+</p>
+팀장 승인/거절
+<p align="center">
+   <img src="./img/appadmin1.png" alt="팀 승인1" width="500"/>
+</p>
+<p align="center">
+   <img src="./img/appadmin2.png" alt="팀 승인2" width="500"/>
+</p>
+</details>
+<details>
+<summary><b>3. 릴레이 달리기</b></summary>
+시작 화면
+마이페이지 → 내 팀/가입된 팀 → 팀 선택
+<p align="center">
+   <img src="./img/relaystartpage.png" alt="릴레이 시작" width="500"/>
+</p>
+정상 릴레이 진행
+팀장이 시작 버튼 → 릴레이 활동 시작 (팀장이 먼저 혼자 달림)
+<p align="center">
+   <img src="./img/relayleaderstart.png" alt="정상 릴레이" width="500"/>
+</p>
+Skip 기능 (팀장 전용)
+지각, 시간 내 미완료 등 의도 외 상황 대응
+<p align="center">
+   <img src="./img/skip.png" alt="스킵" width="500"/>
+</p>
+완료율 변화
+Skip/미완료 시: 완료율 하락
+<p align="center">
+   <img src="./img/ratedrop.png" alt="완료율 하락" width="400"/>
+</p>
+정상 완료 시: 완료율 유지/상승
+<p align="center">
+   <img src="./img/ratemaintain.png" alt="완료율 유지" width="400"/>
+</p>
+</details>
+
+💬 커뮤니티
+<details>
+<summary><b>1. 피드</b></summary>
+운동 피드 작성
+활동 내역에서 직접 작성 가능
+<p align="center">
+   <img src="./img/runfeedbefore.png" alt="운동피드 작성 전" width="500"/>
+</p>
+피드 상세 (함께 달린 사람 표시)
+<p align="center">
+   <img src="./img/feeddetail.png" alt="피드 세부" width="500"/>
+</p>
+발산 구역 (익명 트리홀)
+홈 → 하단 "+" → 발산 구역 → 익명 체크
+<p align="center">
+   <img src="./img/ventfeed1.png" alt="발산피드 작성" width="500"/>
+</p>
+<p align="center">
+   <img src="./img/ventfeed2.png" alt="발산피드 보기" width="500"/>
+</p>
+</details>
+<details>
+<summary><b>2. 채팅</b></summary>
+팀 채팅
+팀 모집 완료 후 자동 생성
+<p align="center">
+   <img src="./img/groupchat.png" alt="그룹챗" width="500"/>
+</p>
+</details>
+<details>
+<summary><b>3. 알림</b></summary>
+알림 센터
+<p align="center">
+   <img src="./img/newnoti1.png" alt="알림1" width="500"/>
+</p>
+<p align="center">
+   <img src="./img/newnoti2.png" alt="알림2" width="500"/>
+</p>
+</details>
+
+👤 프로필
+<details>
+<summary><b>개인 프로필</b></summary>
+프로필 메인
+<p align="center">
+   <img src="./img/profile.png" alt="프로필" width="500"/>
+</p>
+팔로우 & 채팅
+타인 프로필 방문 시
+<p align="center">
+   <img src="./img/beforefollowandchat.png" alt="팔로우 전" width="500"/>
+</p>
+팔로우 후
+<p align="center">
+   <img src="./img/afterfollow.png" alt="팔로우 후" width="500"/>
+</p>
+팔로잉/팔로워 리스트
+<p align="center">
+   <img src="./img/following.png" alt="팔로잉" width="500"/>
+</p>
+<p align="center">
+   <img src="./img/follower.png" alt="팔로워" width="500"/>
+</p>
+프로필 수정
+<p align="center">
+   <img src="./img/profileedit.png" alt="프로필 수정" width="500"/>
+</p>
+내 팀 & 가입된 팀
+활동 중 표시로 진행 중인 릴레이 확인 가능
+<p align="center">
+   <img src="./img/acting.png" alt="활동중" width="500"/>
+</p>
+</details>
+
+🐛 알려진 이슈
+🔴 Critical
+
+서비스 로직상 모바일 앱이어야 함 - 웹 기반의 한계
+지도 API 미구현 - 서비스 로직 복잡도로 인한 시간 부족
+완료/미완료 구분 오류 - 기록에서 모두 '완료'로 표시됨
+익명 피드 응급 조치 기능 없음 - 위기 상황 대응 불가
+
+🟡 Important
+
+팀장 권한 부족 - 경로/시간/멤버 수정 불가
+팀원 탈퇴 기능 없음
+지역 필터링 하드코딩 - 동적 처리 필요
+릴레이 중 알림 미구현
+
+🟢 Minor
+
+비밀번호 찾기 미구현
+개인 인증 없음 - 실명 인증 시스템 부재
+
+
+📄 라이선스
+이 프로젝트는 개인 포트폴리오용으로 제작되었습니다.
+
+📧 문의
+프로젝트에 대한 문의사항이 있으시면 이슈를 등록해주세요.
 
 <p align="center">
-       <img src="./img/profileedit.png" alt="프로파일" width="500" />
+  <sub>Made with ❤️ for people fighting their clouds</sub>
 </p>
-
-
-
-### SNS 공유 노트 (홈페이지/메인 피드)
-
-
-<p align="center">
-       <img src="./img/feeddetail.png" alt="피드 세부" width="500" />
-</p>
-
-<p align="center">
-       <img src="./img/acting.png" alt="활동중" width="500" />
-</p>
-
-<p align="center">
-       <img src="./img/newnoti1.png" alt="알림1" width="500" />
-</p>
-
-<p align="center">
-       <img src="./img/newnoti2.png" alt="알림2" width="500" />
-</p>
-
-<p align="center">
-       <img src="./img/runfeedbefore.png" alt="운동피드 작성 전" width="500" />
-</p>
-
-<p align="center">
-       <img src="./img/ventfeed1.png" alt="발산피드 작성 중" width="500" />
-</p>
-
-<p align="center">
-       <img src="./img/ventfeed2.png" alt="발산피드 작성 " width="500" />
-</p>
-홈페이지의 주요 기능은 두 가지입니다: 첫째는 팀 구성 기능, 둘째는 노트 자유롭게 탐색 기능입니다.
-
-1. **노트 목록 검색 및 필터링:**  
-   공유 구역, 일상 구역, 감정 배출 구역(사용자가 익명 또는 반익명으로 부정적 감정 작성 가능)으로 나뉩니다. 기본값은 공유 구역이며, 지역/공유·일상·배출 구분/팀원 동태(기본값)로 필터링할 수 있습니다.
-2. **좋아요 및 북마크:**  
-   좋아요는 숫자로만 표시되며, 북마크는 북마크 노트 폴더에 저장됩니다.
-3. **노트 작성:**  
-   "+" 버튼 클릭 시 직접 노트 작성 가능.
-4. **댓글 기능:**  
-   기본적인 댓글 기능 제공.
-
----
-
-## 달리기 실행
-
-1. **【선택사항】** 달리기 팀 활동 종료 후, 완료 시 노트 작성 초대가 자동으로 표시됩니다. 달리기 노트에는 "누가 나와 함께 달렸나" 항목이 추가되며, 당분간은 직접 선택하여 표시할 수 있습니다.
-2. 이러한 결과는 완료율에 직접 반영됩니다.
-
----
-
-## 현재 문제점 (이슈)
-0. 서비스의 로직에서 보면 앱이어야 함...
-
-1. 팀장이 경로, 시간, 멤버를 수정할 수 있는 기능이 없습니다.
-2. 팀원이 팀을 탈퇴할 수 있는 버튼이 없습니다.
-3. 지도 API를 사용하고 싶으나, 서비스 로직이 너무 복잡하여 시간 내 완성하기 어렵습니다.
-4. 완료/미완료 사용자가 기록에서 모두 '완료'로 표시되는 문제가 있습니다.
-5. 지역 필터링이 일단 하드코딩된 상태입니다.
