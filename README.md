@@ -87,6 +87,10 @@
 
 ## 기능 소개
 
+<p align="center">
+   <img src="./img/home.png" alt="홈" width="600" style="display:block; margin:auto"/>
+</p>
+
 ### 로그인 & 회원가입
 ---
 #### 1.로그인 화면
