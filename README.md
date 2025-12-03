@@ -422,8 +422,3 @@
 
 프로젝트에 대한 문의사항이 있으시면 이슈를 등록해주세요.
 
----
-
-<p align="center">
-  <sub>Made with ❤️ for people fighting their clouds</sub>
-</p>
