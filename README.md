@@ -287,6 +287,7 @@
 </p>
 
 **정상 진행**: 팀장이 시작 버튼 → 릴레이 활동 시작 (팀장이 먼저 혼자 달림)
+전 주자가 직접 시간 내에 릴레 버튼
 
 <p align="center">
    <img src="./img/relayleaderstart.png" alt="정상 릴레이" width="500"/>
