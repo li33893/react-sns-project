@@ -310,7 +310,7 @@
 </p>
 
 <p align="center">
-   <img src="./img/appadmin2.png" alt="팀 승인2" width="500"/>
+   <img src="./img/appadmin.png" alt="팀 승인2" width="500"/>
 </p>
 
 ---
@@ -373,6 +373,19 @@
 
 <p align="center">
    <img src="./img/ventfeed2.png" alt="발산피드 보기" width="500"/>
+</p>
+
+---
+
+#### 피드 수정/ 삭제
+마이페이지->내 피드->피드 선택
+
+<p align="center">
+   <img src="./img/editdelete.png" alt="발산피드 작성" width="500"/>
+</p>
+
+<p align="center">
+   <img src="./img/editdelete2.png" alt="발산피드 보기" width="500"/>
 </p>
 
 ---
