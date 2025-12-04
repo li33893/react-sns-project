@@ -287,7 +287,7 @@ function GroupApplications() {
                                             </Typography>
                                         </Box>
 
-                                        <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+                                        {/* <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
                                             <HealthAndSafetyIcon sx={{ fontSize: 20, mr: 1, color: '#4CAF50', mt: 0.5 }} />
                                             <Box sx={{ flex: 1 }}>
                                                 <Typography variant="caption" sx={{ color: '#666', display: 'block' }}>
@@ -297,7 +297,7 @@ function GroupApplications() {
                                                     {app.healthInfo}
                                                 </Typography>
                                             </Box>
-                                        </Box>
+                                        </Box> */}
 
                                         {app.occupation && (
                                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
