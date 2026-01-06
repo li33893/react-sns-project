@@ -31,6 +31,41 @@
 
 ---
 
+## 🔧 기술 스택
+
+**개발 기간**: 2025.11.25 ~ 2025.12.02 (8일)
+
+### Frontend
+
+| 기술명 | 설명 |
+|--------|------|
+| ![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react&logoColor=white) | React 18.3.1 - 최신 React 기능을 활용한 컴포넌트 기반 개발 |
+| ![Material-UI](https://img.shields.io/badge/Material--UI-6.1.5-007FFF?logo=mui&logoColor=white) | Material-UI 6.1.5 - 일관된 UI 컴포넌트 라이브러리 |
+| ![React Router](https://img.shields.io/badge/React_Router-6.27.0-CA4245?logo=react-router&logoColor=white) | React Router 6.27.0 - 클라이언트 사이드 라우팅 |
+| ![Socket.io-Client](https://img.shields.io/badge/Socket.io--Client-4.8.1-010101?logo=socket.io&logoColor=white) | Socket.io-client 4.8.1 - 실시간 채팅 WebSocket 클라이언트 |
+| ![JWT Decode](https://img.shields.io/badge/JWT_Decode-4.0.0-000000?logo=jsonwebtokens&logoColor=white) | jwt-decode 4.0.0 - JWT 토큰 디코딩 |
+
+### Backend
+
+| 기술명 | 설명 |
+|--------|------|
+| ![Node.js](https://img.shields.io/badge/Node.js-24.11.1-339933?logo=node.js&logoColor=white) | Node.js 24.11.1 - 비동기 이벤트 기반 서버 런타임 |
+| ![Express](https://img.shields.io/badge/Express-5.1.0-000000?logo=express&logoColor=white) | Express 5.1.0 - 간결한 웹 프레임워크 |
+| ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white) | MySQL 8.0 - 관계형 데이터베이스 |
+| ![Socket.io](https://img.shields.io/badge/Socket.io-4.7.2-010101?logo=socket.io&logoColor=white) | Socket.io 4.7.2 - 실시간 채팅 WebSocket 서버 |
+| ![JWT](https://img.shields.io/badge/JWT-9.0.2-000000?logo=jsonwebtokens&logoColor=white) | JWT 9.0.2 - 토큰 기반 인증 |
+| ![bcrypt](https://img.shields.io/badge/bcrypt-6.0.0-338033?logo=letsencrypt&logoColor=white) | bcrypt 6.0.0 - 비밀번호 해싱 (saltRounds: 10) |
+| ![Multer](https://img.shields.io/badge/Multer-2.0.2-FF6600?logo=files&logoColor=white) | Multer 2.0.2 - 파일 업로드 처리 |
+
+### 외부 API
+
+| 기술명 | 설명 |
+|--------|------|
+| ![Daum Postcode](https://img.shields.io/badge/Daum_Postcode-API-FFCD00?logo=kakao&logoColor=black) | Daum 우편번호 API - 주소 검색 서비스 |
+
+---
+
+
 ## 🚀 핵심 기능
 
 ### 1. 🏃 릴레이 조깅 시스템
@@ -100,29 +135,6 @@
 
 ---
 
-## 🔧 기술 스택
-
-### Frontend
-- **React 18.3.1** - 컴포넌트 기반 개발
-- **Material-UI 6.1.5** - 일관된 UI 디자인
-- **React Router 6.27.0** - 클라이언트 사이드 라우팅
-- **Socket.io-client 4.8.1** - 실시간 WebSocket 클라이언트
-- **jwt-decode 4.0.0** - JWT 토큰 디코딩
-
-### Backend
-- **Node.js 24.11.1** - 비동기 이벤트 기반 서버
-- **Express 5.1.0** - 웹 프레임워크
-- **MySQL 8.0** - 관계형 데이터베이스
-- **Socket.io 4.7.2** - 실시간 WebSocket 서버
-- **JWT 9.0.2** - 토큰 기반 인증
-- **bcrypt 6.0.0** - 비밀번호 해싱 (saltRounds: 10)
-- **Multer 2.0.2** - 파일 업로드 처리
-
-### 외부 API
-- **Daum Postcode API** - 주소 검색 서비스
-
----
-
 ## 📱 주요 화면
 
 ### 🔐 회원가입 & 로그인
@@ -152,7 +164,7 @@
 
 ## 🔧 개발 과정 및 문제 해결
 
-초기 단순 테이블 구조로는 릴레이 조깅의 복잡한 비즈니스 로직(역할 전환, Skip 처리, 완료율 계산)을 관리할 수 없어 개발 중 시간을 낭비했습니다. 이를 해결하기 위해 릴레이 로직을 세분화하여 **14개 테이블**로 재설계했으며, 정규화와 인덱싱을 통해 데이터 정합성과 조회 성능을 확보했습니다. 이 과정을 통해 요구사항 분석의 중요성과 확장 가능한 데이터베이스 설계 원칙을 체득했습니다.
+초기 단순 테이블 구조로는 릴레이 조깅의 복잡한 비즈니스 로직를 관리할 때 오히려 어려움을 느꼈으며 개발 중 시간을 낭비했습니다. 이를 해결하기 위해 시간을 더 투자하여 릴레이 로직을 세분화하여 14개 테이블로 재설계를 하고 다시 시작했습니다. 이 과정을 통해 요구사항 분석의 중요성과 확장 가능한 데이터베이스 설계 원칙을 체득했습니다.
 
 ---
 
