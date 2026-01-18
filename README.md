@@ -78,8 +78,8 @@
 - **React State 기반 상태 관리**: useState, useEffect로 타이머 및 역할 전환 구현
 
 <p align="center">
-   <img src="./img/relayleaderstart.png" alt="릴레이 진행" width="400"/>
-   <img src="./img/skip.png" alt="Skip 기능" width="400"/>
+   <img src="./img/relayleaderstart.png" alt="릴레이 진행" width="300" height="600"/>
+   <img src="./img/skip.png" alt="Skip 기능" width="300" height="600"/>
 </p>
 
 ### 2. 📝 3개 구역 커뮤니티 피드
