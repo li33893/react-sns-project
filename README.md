@@ -77,10 +77,12 @@
 - **완료율 시스템**: 신용도 지표로 활용 (팀장 자격 90% 이상)
 - **React State 기반 상태 관리**: useState, useEffect로 타이머 및 역할 전환 구현
 
-<p align="center">
-   <img src="./img/relayleaderstart.png" alt="릴레이 진행" width="300" height="600" style="margin-right: 20px;"/>
-   <img src="./img/skip.png" alt="Skip 기능" width="300" height="600"/>
-</p>
+<table>
+  <tr>
+    <td><img src="./img/relayleaderstart.png" alt="릴레이 진행" width="300"/></td>
+    <td><img src="./img/skip.png" alt="Skip 기능" width="300"/></td>
+  </tr>
+</table>
 
 ### 2. 📝 3개 구역 커뮤니티 피드
 
@@ -90,10 +92,12 @@
 
 **기능**: 좋아요, 댓글, 북마크, 수정/삭제, 지역/구역별 필터링, 검색
 
-<p align="center">
-   <img src="./img/feeddetail.png" alt="피드 상세" width="400"/>
-   <img src="./img/ventfeed2.png" alt="익명 피드" width="400"/>
-</p>
+<table>
+  <tr>
+    <td><img src="./img/feeddetail.png" alt="피드 상세" width="300"/></td>
+    <td><img src="./img/ventfeed2.png" alt="익명 피드" width="300"/></td>
+  </tr>
+</table>
 
 ### 3. 👥 팀 관리
 
@@ -141,24 +145,30 @@
 
 **JWT 토큰 기반 인증**, bcrypt 비밀번호 해싱, Daum API 주소 검색
 
-<p align="center">
-   <img src="./img/signup.png" alt="회원가입" width="300"/>
-   <img src="./img/login1.png" alt="로그인" width="300"/>
-</p>
+<table>
+  <tr>
+    <td><img src="./img/signup.png" alt="회원가입" width="300"/></td>
+    <td><img src="./img/login1.png" alt="로그인" width="300"/></td>
+  </tr>
+</table>
 
 ### 🏃 팀 생성 & 가입
 
-<p align="center">
-   <img src="./img/creategroup2.png" alt="팀 생성" width="300"/>
-   <img src="./img/teamselection.png" alt="팀 선택" width="300"/>
-</p>
+<table>
+  <tr>
+    <td><img src="./img/creategroup2.png" alt="팀 생성" width="300"/></td>
+    <td><img src="./img/teamselection.png" alt="팀 선택" width="300"/></td>
+  </tr>
+</table>
 
 ### 💬 커뮤니티 & 알림
 
-<p align="center">
-   <img src="./img/runfeedbefore.png" alt="운동 피드" width="300"/>
-   <img src="./img/newnoti1.png" alt="알림" width="300"/>
-</p>
+<table>
+  <tr>
+    <td><img src="./img/runfeedbefore.png" alt="운동 피드" width="300"/></td>
+    <td><img src="./img/newnoti1.png" alt="알림" width="300"/></td>
+  </tr>
+</table>
 
 ---
 
