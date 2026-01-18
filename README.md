@@ -153,7 +153,7 @@
    <img src="./img/creategroup2.png" alt="팀 생성" width="300"/>
 </p>
 
-### 💬 커뮤니티 & 알림
+### 💬 알림
 
 <p align="center">
    <img src="./img/newnoti1.png" alt="알림" width="300"/>
