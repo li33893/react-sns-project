@@ -94,7 +94,7 @@
 <p align="center">
    <img src="./img/feeddetail.png" alt="피드 상세" width="400" height="320"/>
      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <img src="./img/ventfeed2.png" alt="익명 피드" width="400" height="320"/>
+   <img src="./img/ventfeed2.png" alt="익명 피드" width="400" height="360"/>
 </p>
 
 ### 3. 👥 팀 관리
