@@ -77,12 +77,11 @@
 - **완료율 시스템**: 신용도 지표로 활용 (팀장 자격 90% 이상)
 - **React State 기반 상태 관리**: useState, useEffect로 타이머 및 역할 전환 구현
 
-<table>
-  <tr>
-    <td><img src="./img/relayleaderstart.png" alt="릴레이 진행" width="300"/></td>
-    <td><img src="./img/skip.png" alt="Skip 기능" width="300"/></td>
-  </tr>
-</table>
+<p align="center">
+   <img src="./img/relayleaderstart.png" alt="릴레이 진행" width="300" height="600" style="margin-right: 20px;"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <img src="./img/skip.png" alt="Skip 기능" width="300" height="600"/>
+</p>
 
 ### 2. 📝 3개 구역 커뮤니티 피드
 
@@ -92,12 +91,10 @@
 
 **기능**: 좋아요, 댓글, 북마크, 수정/삭제, 지역/구역별 필터링, 검색
 
-<table>
-  <tr>
-    <td><img src="./img/feeddetail.png" alt="피드 상세" width="300"/></td>
-    <td><img src="./img/ventfeed2.png" alt="익명 피드" width="300"/></td>
-  </tr>
-</table>
+<p align="center">
+   <img src="./img/feeddetail.png" alt="피드 상세" width="400"/>
+   <img src="./img/ventfeed2.png" alt="익명 피드" width="400"/>
+</p>
 
 ### 3. 👥 팀 관리
 
@@ -145,30 +142,24 @@
 
 **JWT 토큰 기반 인증**, bcrypt 비밀번호 해싱, Daum API 주소 검색
 
-<table>
-  <tr>
-    <td><img src="./img/signup.png" alt="회원가입" width="300"/></td>
-    <td><img src="./img/login1.png" alt="로그인" width="300"/></td>
-  </tr>
-</table>
+<p align="center">
+   <img src="./img/signup.png" alt="회원가입" width="300"/>
+   <img src="./img/login1.png" alt="로그인" width="300"/>
+</p>
 
 ### 🏃 팀 생성 & 가입
 
-<table>
-  <tr>
-    <td><img src="./img/creategroup2.png" alt="팀 생성" width="300"/></td>
-    <td><img src="./img/teamselection.png" alt="팀 선택" width="300"/></td>
-  </tr>
-</table>
+<p align="center">
+   <img src="./img/creategroup2.png" alt="팀 생성" width="300"/>
+   <img src="./img/teamselection.png" alt="팀 선택" width="300"/>
+</p>
 
 ### 💬 커뮤니티 & 알림
 
-<table>
-  <tr>
-    <td><img src="./img/runfeedbefore.png" alt="운동 피드" width="300"/></td>
-    <td><img src="./img/newnoti1.png" alt="알림" width="300"/></td>
-  </tr>
-</table>
+<p align="center">
+   <img src="./img/runfeedbefore.png" alt="운동 피드" width="300"/>
+   <img src="./img/newnoti1.png" alt="알림" width="300"/>
+</p>
 
 ---
 
@@ -186,4 +177,4 @@ lmeiling322830@gmail.com
 
 ## 📄 라이선스
 
-이 프로젝트는 개인 포트폴리오용으로 제작되었습니다.
+이 프로젝트는 개인 포트폴리오용으로 제작되었습니
